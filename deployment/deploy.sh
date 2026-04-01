@@ -16,7 +16,12 @@ sort -u deployment/deploy.txt -o deployment/deploy.txt
 
 tar -cvf deployment/update.tar -T deployment/deploy.txt
 
-# add ftp to send tar to deployement server
+ftp -inv 100.101.227.40 <<EOF
+user your_username your_password
+binary
+put deployment/update.tar
+bye
+EOF
 
 mv deployment/newVer.txt deployment/baseVer.txt
 
