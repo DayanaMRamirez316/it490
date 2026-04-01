@@ -1,5 +1,6 @@
 #!/usr/bin/php
 <?php
+//DB LISTENER - This file does the login requests from RabbitMQ and queries database 
 require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');

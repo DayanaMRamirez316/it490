@@ -1,4 +1,5 @@
 <?php
+// HANDLING REQUEST FROM FRONT END LOGIN - this file sends the login request to rabbitq.
 require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
