@@ -1,12 +1,17 @@
 #!/usr/bin/php
 <?php
+/*
+testLoginWIthDB.php is the main backend rabbitmq server for the project. 
+This file gets requests from the php files called by frontend through rabbit. 
+These request types include : login, registration, sessions, reviews, follows, and anythinelse profile related. 
+This file queries and updates the mysql database!! 
+Note: It does say testLoginWithDB, but obviously it just became way more than login and more so a file full of backend functions.
+*/
 require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 
 $mydb = new mysqli('127.0.0.1','userInfo','theBestPassword','data');
-
-
 
 
 if ($mydb->errno != 0)
@@ -19,6 +24,8 @@ echo "successfully connected to database".PHP_EOL;
 
 
 function doLogin($email,$password)
+//this is the function that handles login. It accepts the email and password and checks if it is correct. 
+// If it is correct, it creates a session token for the user and returns it to the frontend.
 {
     global $mydb;
     $query = "select id, email, password from Users where Users.email= ?;";
@@ -62,6 +69,8 @@ function doLogin($email,$password)
 }
 
 function doRegister($email, $password)
+//funtion to handle registration. accepting email and password and 
+//creates a new user in the database if the email is not already taken.
 {
 
     global $mydb;
@@ -91,6 +100,9 @@ function doRegister($email, $password)
 }
 
     function doValidate($sessionID)   
+//this is to validate a session token. It accepts a session token and checks if it is valid. 
+// If  valid, update the expiration date of the session token and return true. If not, return false. 
+// This checks if a user is logged in or not.
   {
 	 global $mydb;
 	 $query = "SELECT * FROM Sessions WHERE session_token = ? AND expires > NOW()";
@@ -125,6 +137,8 @@ function doRegister($email, $password)
     
  }
 function deleteSession($sessionID)
+//this logs out the user by deleting the session token from the database. 
+// REquest type is delete_session and session token is sent.     
 {
 	global $mydb;
 	$query = "DELETE FROM Sessions WHERE session_token = ?";
@@ -141,7 +155,10 @@ function deleteSession($sessionID)
 	return array ("returnCode" => 1, "message" => "session deleted/ logged out!!!");
 }
 
-function newReview($user_id, $game, $rating, $reviewText, $genre, $release, $is_private){
+function newReview($user_id, $game, $rating, $reviewText, $genre, $release, $is_private)
+//Accepts the user_id, game name, rating, review text, genre, release date, and whether the review is private or not.
+//this makes the review 
+{
 	global $mydb;
 	$query = "INSERT IGNORE INTO Games (game, genre, release_date) VALUES (?, ?, ?)";
 	$stmt = $mydb->prepare($query);
@@ -185,12 +202,12 @@ function newReview($user_id, $game, $rating, $reviewText, $genre, $release, $is_
 
 	
 	return array ("returnCode" => 1, "message" => "review uploaded");
-
-
-
 }
 
+
 function handlePrivate($user_id, $game)
+//this changes whether a review is private or public. 
+// Being used from a profile page where a user can make his/her reviews public or private. 
 {      
 	global $mydb;
 	//gets game_id based on game name
@@ -205,8 +222,6 @@ function handlePrivate($user_id, $game)
                 echo __FILE__.':'.__LINE__.":error: ".$mydb->error.php_EOL;
                 return array ("returnCode" => 0, "message" => "db error");
         }
-
-
         $response = $stmt->get_result();
         $row = $response->fetch_assoc();
 	
@@ -247,11 +262,12 @@ function handlePrivate($user_id, $game)
     } else {
         return array("returnCode" => 0, "message" => "Review not found");
     }
-}
+} 
 
 
 function getReviews($user_id){
-
+//a user will get all the reviews they made and is displayed on their profile page. this includes 
+// private ones as well as long as they are the main user of the account. The request type is get_user_reviews.
 	global $mydb;
          $query = "SELECT * FROM User_Reviews Join Games ON User_Reviews.game_id = Games.game_id WHERE user_id = ?";
          $stmt = $mydb->prepare($query);
@@ -275,7 +291,8 @@ function getReviews($user_id){
 
 
 function getFollowedReviews($user_id){
-
+//this is to accept the request type "get_user_reviews." 
+//user_id is sent and it fetches all the reviews from the followed users. 
         global $mydb;
         $query = "
         SELECT 
@@ -317,7 +334,10 @@ function getFollowedReviews($user_id){
 }
 
 function handleFollow($user_id, $follow_id){
-
+//this handled the following and unfollwing of users by accepting the type "follow". 
+//you send in a user_id and follow_id (id of the user you want to follow or unfollow). 
+// This function adds your follow to the user_following table or removes it if it is 
+//in there already
 	 global $mydb;
          $query = "SELECT * FROM User_Following WHERE user_id = ? AND following_id = ?";
          $stmt = $mydb->prepare($query);
@@ -373,7 +393,9 @@ function handleFollow($user_id, $follow_id){
 
 }
 
-function getAll($search){
+function getAll($search)
+//this is to get all reviews based on a search string. It accepts the search string and checks if it is in the game name.
+{
 	
 	global $mydb;
          $query = "
@@ -415,7 +437,7 @@ function getAll($search){
 }
 
 function getProfileInfo($user_id){
-
+//this is to get the profile information of a user. It accepts the user_id and returns the email
 	global $mydb;
          $query = "SELECT * FROM Users WHERE id = ?";
          $stmt = $mydb->prepare($query);
@@ -441,7 +463,9 @@ function getProfileInfo($user_id){
 }
 
 function getFollowStatus($user_id, $follow_id){
-
+//checks if you are following a user or not. It tells the front end to either show a 
+//follow or unfollow button on the profile page. Request type is get_follow_status 
+//and you send in the user_id and the follow_id (id of the profile page you are viewing).
 	global $mydb;
          $query = "SELECT * FROM User_Following WHERE user_id = ? AND following_id = ?";
          $stmt = $mydb->prepare($query);
@@ -464,7 +488,12 @@ function getFollowStatus($user_id, $follow_id){
 
 } 
 
-function getRecommendations($user_id){
+function getRecommendations($user_id)
+//this is to get game recommendations based on the user's reviews.
+//gets the average rating of each genre that the user has reviewed and returns the genres 
+//that have an average rating of 75 or higher. If there are no genres with an average rating of 75 or higher, 
+//it returns the top 3 genres with the highest average rating.
+{
 
 	 global $mydb;
          $query = "SELECT Games.genre, AVG(User_Reviews.rating) FROM User_Reviews JOIN Games ON User_Reviews.game_id = Games.game_id WHERE User_Reviews.user_id = ? GROUP BY Games.genre HAVING AVG(User_Reviews.rating) > 75";
@@ -515,7 +544,11 @@ function getRecommendations($user_id){
 
 }
 
-function getProfileALL($user_id, $follow_id, $viewer_id){
+function getProfileALL($user_id, $follow_id, $viewer_id)
+//this is to get all the information for a profile page. 
+// It accepts the user_id of the profile page, the follow_id (id of the profile page), 
+//and the viewer_id (id of the user who is viewing the profile page).
+{
 
         global $mydb;
 	$query = "SELECT * FROM User_Reviews Join Games ON User_Reviews.game_id = Games.game_id Join Users ON User_Reviews.user_id = Users.id WHERE User_Reviews.user_id = ?";
@@ -576,13 +609,8 @@ function getProfileALL($user_id, $follow_id, $viewer_id){
 }
 
 
-
-
-
-
-
-
 function requestProcessor($request)
+//this function processes the requests from the frontend. the type of the request is checked and then it is called. 
 {
   echo "received request".PHP_EOL;
   var_dump($request);
