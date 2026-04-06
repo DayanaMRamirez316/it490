@@ -1,0 +1,12 @@
+[Unit]
+Description=Deployment Installer
+After=network.target rabbitmq-server.service
+
+[Service]
+WorkingDirectory=/opt/it490/
+ExecStart=/usr/local/bin/installer.sh
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
