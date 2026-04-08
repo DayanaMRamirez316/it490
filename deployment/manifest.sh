@@ -17,6 +17,9 @@ while IFS='|' read -r archived_file final_path; do
 
     mkdir -p "$(dirname "$final_path")" || exit 1
     cp -f "$tmpdir/$archived_file" "$final_path" || exit 1
+    echo "looped"
 done < "$manifest"
 
 rm -rf "$tmpdir"
+
+echo "all done"
