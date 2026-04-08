@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ROLLBACK_VER = $1
-BUNDLE_PATH=""
+BUNDLE_PATH="$HOME/deployment/bundles/$ROLLBACK_VER"
 PROD_VM="user@prod-ip"
 PROD_PATH="/var/www/html/"
 
