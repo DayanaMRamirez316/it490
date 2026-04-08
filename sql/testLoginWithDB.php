@@ -608,6 +608,21 @@ function getProfileALL($user_id, $follow_id, $viewer_id)
 
 }
 
+function getGameList($search){
+	//send request to dmz
+	$client = new rabbitMQClient("dmz.ini","testServer");
+	$request = array();
+	$request['type'] = 'listGames';
+	$request['search'] = $search;
+	$response = $client->send_request($request);
+	if($response['returnCode'] == 1){
+		//return data
+		return $response['games'];
+	}else{
+		//return empty for now
+		return array();
+	}
+}
 
 function requestProcessor($request)
 //this function processes the requests from the frontend. the type of the request is checked and then it is called. 
@@ -648,7 +663,8 @@ function requestProcessor($request)
              return getRecommendations($request['user_id']);
      case "get_profile_all":
              return getProfileAll($request['user_id'], $request['follow_id'], $request['viewer_id']);
-
+     case "listGames":
+	     return getGameList($request['search']);
 
 
 
