@@ -1,5 +1,5 @@
 #!/bin/bash 
-destDir="/c/Users/annbo/NJIT/IT490/it490"
+destDir="/opt/it490/"
 cd "$destDir"
 find . \( -path "./.git" -o -path "./deployment" \) -prune -o -type f -exec sha256sum --text "{}" \; | sort > ./deployment/newVer.txt
 

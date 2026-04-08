@@ -5,7 +5,7 @@
 //require_once('rabbitMQLib.inc');
 
 function doDeploy($version) {
-	exec("/bin/bash deploy.sh $version", $output, $code);
+	exec("/bin/bash /opt/it490/deployment/deploy.sh $version", $output, $code);
 	echo $output;
 }
 
