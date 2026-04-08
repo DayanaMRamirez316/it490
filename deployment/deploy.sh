@@ -1,6 +1,7 @@
 #!/bin/bash 
-cd ..
-find . \( -path "./.git" -o -path "./deployment" \) -prune -o -type f -exec sha256sum "{}" \; | sort > deployment/newVer.txt
+destDir="/c/Users/annbo/NJIT/IT490/it490"
+cd "$destDir"
+find . \( -path "./.git" -o -path "./deployment" \) -prune -o -type f -exec sha256sum --text "{}" \; | sort > ./deployment/newVer.txt
 
 join -j 2 \
     <(awk '{ path=substr($0, index($0,$2)); sub(/^\*/, "", path); print $1, path }' deployment/baseVer.txt | sort -k2,2) \
@@ -14,30 +15,31 @@ comm -13 \
 
 sort -u deployment/deploy.txt -o deployment/deploy.txt
 
-tar -cvf deployment/update.tar -T deployment/deploy.txt
+awk '{ gsub(/^\.\//, "", $0); print "./"$0 "|" "/opt/it490/" $0 }' deployment/deploy.txt > deployment/manifest.txt
 
-ftp -inv 100.101.227.40 <<EOF
-user your_username your_password
-binary
-put deployment/update.tar
-bye
-EOF
+tar -cvf deployment/package.tar -T deployment/deploy.txt deployment/manifest.txt
+
+#ftp -inv #insert deploy server ip
+#<<EOF 
+#user your_username your_password
+#binary
+#put deployment/update.tar
+#bye
+#EOF
 
 # metadata stuff
 
-currentVersion=$(cat deployment/newVer.txt)
-echo "Making the metdata"
+echo "Metadata Construction"
 
 cat > deployment/metadata.json <<EOF
 {
   "file_location": "/deployment/update.tar",
-  "version": "$currentVersion"
+  "version": "$1"
 }
 EOF
 
 echo "metadata.json created with version: $currentVersion"
 
-
 mv deployment/newVer.txt deployment/baseVer.txt
 
-rm deployment/deploy.txt
+rm -f deployment/deploy.txt
