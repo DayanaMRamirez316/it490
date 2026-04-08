@@ -44,4 +44,4 @@ awk "BEGIN {print $currentVersion + 0.1}" > deployment/versionNum.txt
 
 mv deployment/newVer.txt deployment/baseVer.txt
 
-rm -f deployment/deploy.txt deployment/manifest.txt
+rm -f deployment/deploy.txt

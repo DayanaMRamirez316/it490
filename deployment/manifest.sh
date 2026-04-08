@@ -2,7 +2,13 @@
 
 archive="package.tar"
 manifest="manifest.txt"
-tmpdir= $(mktemp -d)
+tmpdir=$(mktemp -d)
+
+tar -xf "$archive" -C "$tmpdir" "$manifest" || {
+    echo "Failed to extract manifest"
+    rm -rf "$tmpdir"
+    exit 1
+}
 
 while IFS='|' read -r archived_file final_path; do
     [ -z "$archived_file" ] && continue
