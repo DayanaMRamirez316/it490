@@ -29,18 +29,16 @@ tar -cvf deployment/package.tar -T deployment/deploy.txt deployment/manifest.txt
 
 # metadata stuff
 
-currentVersion=$(cat deployment/versionNum.txt)
 echo "Metadata Construction"
 
 cat > deployment/metadata.json <<EOF
 {
   "file_location": "/deployment/update.tar",
-  "version": "$currentVersion"
+  "version": "$1"
 }
 EOF
 
 echo "metadata.json created with version: $currentVersion"
-awk "BEGIN {print $currentVersion + 0.1}" > deployment/versionNum.txt
 
 mv deployment/newVer.txt deployment/baseVer.txt
 
