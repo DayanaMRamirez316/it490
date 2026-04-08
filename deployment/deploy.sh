@@ -15,7 +15,9 @@ comm -13 \
 
 sort -u deployment/deploy.txt -o deployment/deploy.txt
 
-tar -cvf deployment/update.tar -T deployment/deploy.txt
+awk '{ gsub(/^\.\//, "", $0); print "./"$0 "|" "/opt/it490/" $0 }' deployment/deploy.txt > deployment/manifest.txt
+
+tar -cvf deployment/package.tar -T deployment/deploy.txt deployment/manifest.txt
 
 #ftp -inv #insert deploy server ip
 #<<EOF 
@@ -42,4 +44,4 @@ awk "BEGIN {print $currentVersion + 0.1}" > deployment/versionNum.txt
 
 mv deployment/newVer.txt deployment/baseVer.txt
 
-rm deployment/deploy.txt
+rm -f deployment/deploy.txt deployment/manifest.txt
