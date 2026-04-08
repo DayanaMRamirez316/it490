@@ -1,4 +1,6 @@
-01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b  ./sample/app/registration.php
+{
+  "file_location": "/deployment/update.tar",
+  "version": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b  ./sample/app/registration.php
 0798c147f08a5894360adc95e511c9a239a6f7f58455e5a6d3f21fbc3566bb93  ./sample/api/recommendations.php
 089179eab788cdbcab1bdf919c22cee25bd8490252fab598da04c550c7ca6f7d  ./sample/api/listGames.php
 0e1e9681d677f6adeed1ac6e91270c39a2c9382a8b74c4eb4cbc9fe2231171fe  ./composer.json
@@ -59,4 +61,5 @@ ea294359ab80750ebf8adda6ffc0e15ce7d9b02715ddb9144ffa1ba03f09e42f  ./sql/installe
 f193f3d57c4cdc785a0e2fa58d1ccc436289a594074199d76ceac7c93a5da0b1  ./sql/path.inc
 f5974d80fd11863ceae5b415017179815c93b816d04765d3d82f66de68cb7ff9  ./sample/app/validateSession.php
 f82bc2d51fea7c11f362cba1cabf6c8b0d2333c559f1bb0771843d9b80decb65  ./systemd/installer.service
-fce75a9c432f6e921cb06263e919f855a27d3335ca75021e9d709ca227ae6529  ./rpc/loginRequest.php
+fce75a9c432f6e921cb06263e919f855a27d3335ca75021e9d709ca227ae6529  ./rpc/loginRequest.php"
+}

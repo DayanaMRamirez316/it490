@@ -23,6 +23,21 @@ put deployment/update.tar
 bye
 EOF
 
+# metadata stuff
+
+currentVersion=$(cat deployment/newVer.txt)
+echo "Making the metdata"
+
+cat > deployment/metadata.json <<EOF
+{
+  "file_location": "/deployment/update.tar",
+  "version": "$currentVersion"
+}
+EOF
+
+echo "metadata.json created with version: $currentVersion"
+
+
 mv deployment/newVer.txt deployment/baseVer.txt
 
 rm deployment/deploy.txt
