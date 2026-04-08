@@ -6,7 +6,9 @@
 
 function doDeploy($version) {
 	exec("/bin/bash /opt/it490/deployment/deploy.sh $version", $output, $code);
-	echo $output;
+	foreach($output as $line) {
+		echo $line;
+	}
 }
 
 doDeploy(1.0);
