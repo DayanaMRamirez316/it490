@@ -1,12 +1,13 @@
 #!/bin/bash
 
 VERSION=$1
-SOURCE=""
-DEST=""
+SOURCE="$HOME/git/it490"
+DEST="$HOME/deployment/bundles/$VERSION"
 
-mkdir -p "$DEST/rpc" "$DEST/sampled" "$DEST/sql"
+mkdir -p "$DEST/rpc" "$DEST/sample" "$DEST/sql"
 
-rsync -avz "$SOURCE/rpc/"
+
+rsync -avz "$SOURCE/rpc/" "$DEST/rpc/"
 rsync -avz "$SOURCE/sample/" "$DEST/sample/"
 rsync -avz "$SOURCE/sql/" "$DEST/sql/"
 
