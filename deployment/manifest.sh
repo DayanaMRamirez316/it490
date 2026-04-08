@@ -1,7 +1,7 @@
 #!/bin/bash
 
-archive="package.tar"
-manifest="manifest.txt"
+archive="deployment/package.tar"
+manifest="deployment/manifest.txt"
 tmpdir=$(mktemp -d)
 
 tar -xf "$archive" -C "$tmpdir" "$manifest" || {
