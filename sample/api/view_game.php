@@ -33,15 +33,17 @@ require_once('../app/rabbitMQLib.inc');
 
 
 $searchInput ="";
-if($_SERVER["REQUEST_METHOD"] == "GET" && $_GET["game_id"] !="" )
+if($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET["game_id"]) )
 {
-	if(isset($_GET["game_id"])){
-		
+	if($_GET["game_id"] != ""){		
 		$game_id = urlencode($_GET["game_id"]);
+	}else{
+		echo "game_id not found";
+		exit();
 	}
 
 	//get game details using $game_id
-	$client = new rabbitmqClient("testRabbitMQ.ini","testServer");
+	$client = new rabbitMQClient("testRabbitMQ.ini","testServer");
 	
 	$request = array();
 	$request['type'] = 'gameDetails';
@@ -50,8 +52,12 @@ if($_SERVER["REQUEST_METHOD"] == "GET" && $_GET["game_id"] !="" )
 
 	if($response['returnCode'] == 1){
 		//display 
-		$game = $response;
-
+		if(isset($response['game'])){
+			$game = $response['game'];
+		}
+	}else{
+		echo "game details not found";
+		exit();
 	}
 	
 	echo "<ul>";

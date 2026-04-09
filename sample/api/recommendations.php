@@ -33,14 +33,7 @@ if (empty($response['genres'])){
 }else{
 	
 	print_r($response['genres']);
-	$env = parse_ini_file(__DIR__ . '/.env');
-
-	if (!$env || !isset($env['RAWG_API_KEY'])) {
-    		die("API key not found in .env file.");
-	}
-
-	$apiKey = $env['RAWG_API_KEY'];
-	
+		
        //this code converts an array of genres(which is what is stored in the db) to 
 	//an array of genre slugs which is what rawg uses as essentially tags for their 
 	//genres when searching the api. Exampe Grand Strategy would be converted 
@@ -55,42 +48,23 @@ if (empty($response['genres'])){
    
         $genreParam = implode(',', $genreSlugs);
 
-   
-        $rawgAPIurl = "https://api.rawg.io/api/games?key=$apiKey&genres=$genreParam&page_size=100&ordering=-rating";
+	//make connection with rabbit use $genreParam
+	$client = new rabbitMQClient("testRabbitMQ.ini","testServer");
+	$request = array();
+	$request ['type'] = "genres";
+	$request ['genre'] = $genreParam;
 
-	$curl = curl_init();
-
-	curl_setopt($curl, CURLOPT_URL, $rawgAPIurl);
-	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($curl, CURLOPT_HTTPGET, true);
-
-	$responseCurl = curl_exec($curl);
-
-	if (curl_errno($curl)) {
-    		echo "cURL Error: " . curl_error($curl);
-    		curl_close($curl);
-    		exit;
+	$response = $client->send_request($request);
+	if($response['returnCode'] == 1 ){
+		if(isset($response['genre'])){
+			$rawgAPIdata = $response['genre'];
+		}
 	}
-
-	curl_close($curl);
-        
-	$rawgAPIdata = json_decode($responseCurl, true);
-
-	if (!$rawgAPIdata) {
-		
-    		die("Error decoding JSON response.");
-	}
-
-	
-
-	
-
-
 
 	echo "<h2>Video Game Recommendations:</h2>";
 	echo "<ul>";
 
-	foreach ($rawgAPIdata['results'] as $game) {
+	foreach ($rawgAPIdata as $game) {
 
     	echo "<li>";
 	

@@ -620,26 +620,27 @@ function getGameList($search){
 //when user wants more information about a game ...
 function getGameDetails($gameId){
 	$client = new rabbitMQClient("dmz.ini", "testServer");
-        $request = array( 'type' => 'details', 'search' => $gameId );
+        $request = array( 'type' => 'details', 'gameId' => $gameId );
         $response = $client->send_request($request);
-       // unset($client);
+        
         if($response['returnCode'] == 0){
-                return array("returnCode" => 0, "search" => $gameId , "message" => "request not found");
+                return array("returnCode" => 0 , "message" => "request not found");
         }
-        return array("returnCode" => 1, "search" => $gameId, "array" => $response);
+        return array("returnCode" => 1, "game" => $response['game']);
 
 }
 
 //recomendations for recomentions.php file
 function getGenre($genre){
 	$client = new rabbitMQClient("dmz.ini", "testServer");
-        $request = array( 'type' => 'recomendGenre', 'search' => $genre );
+        $request = array( 'type' => 'recomendGenre', 'genre' => $genre );
         $response = $client->send_request($request);
-        //unset($client);
-        if($response['returnCode'] != 1){
-                return array("returnCode" => 0, "search" => $genre , "message" => "request not found");
-        }
-        return array("returnCode" => 1, "search" => $genre, "array" => $response);
+        
+        if($response['returnCode'] == 0){
+                return array("returnCode" => 0, "message" => "request not found");
+	}
+
+        return array("returnCode" => 1, "genre" => $response['genre'] );
 }
 
 function requestProcessor($request)
@@ -686,7 +687,7 @@ function requestProcessor($request)
      case "gameDetails":
 	     return getGameDetails($request['gameId']);
      case "genres":
-	     return getGenres($request['genre']);
+	     return getGenre($request['genre']);
 
   }
   return array("returnCode" => '0', 'message'=>"Server received request and processed");
