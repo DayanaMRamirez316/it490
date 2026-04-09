@@ -27,6 +27,11 @@ if (isset($_SESSION['message']))
 </html>
 
 <?php
+require_once('../app/path.inc');
+require_once('../app/get_host_info.inc');
+require_once('../app/rabbitMQLib.inc');
+
+
 $searchInput ="";
 if($_SERVER["REQUEST_METHOD"] == "GET" && $_GET["game_id"] !="" )
 {
@@ -34,45 +39,24 @@ if($_SERVER["REQUEST_METHOD"] == "GET" && $_GET["game_id"] !="" )
 		
 		$game_id = urlencode($_GET["game_id"]);
 	}
+
+	//get game details using $game_id
+	$client = new rabbitmqClient("testRabbitMQ.ini","testServer");
 	
-	$env = parse_ini_file(__DIR__ . '/.env');
+	$request = array();
+	$request['type'] = 'gameDetails';
+	$request['gameId'] = $game_id;
+	$response = $client->send_request($request);
 
-	if (!$env || !isset($env['RAWG_API_KEY'])) {
-    		die("API key not found in .env file.");
+	if($response['returnCode'] == 1){
+		//display 
+		$game = $response;
+
 	}
-
-	$apiKey = $env['RAWG_API_KEY'];
-
-	$rawgAPIurl = "https://api.rawg.io/api/games/$game_id?key=$apiKey";
-
-	$curl = curl_init();
-
-	curl_setopt($curl, CURLOPT_URL, $rawgAPIurl);
-	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($curl, CURLOPT_HTTPGET, true);
-
-	$response = curl_exec($curl);
-
-	if (curl_errno($curl)) {
-    		echo "cURL Error: " . curl_error($curl);
-    		curl_close($curl);
-    		exit;
-	}
-
-	curl_close($curl);
-
-	$game = json_decode($response, true);
-
-	if (!$game) {
-		
-    		die("Error decoding JSON response.");
-	}
-
-echo "<ul>";
-
 	
+	echo "<ul>";
 
-    	  echo "<li>";
+    	echo "<li>";
 	
 	$name = htmlspecialchars($game['name']); 
 	echo "$name | ";

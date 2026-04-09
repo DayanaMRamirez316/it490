@@ -31,6 +31,7 @@ if (empty($response['genres'])){
 	echo" <p>You have not reviewed enough games for recommendations </p>";
 
 }else{
+	
 	print_r($response['genres']);
 	$env = parse_ini_file(__DIR__ . '/.env');
 

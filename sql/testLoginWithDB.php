@@ -11,6 +11,7 @@ require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 
+
 $mydb = new mysqli('127.0.0.1','userInfo','theBestPassword','data');
 
 
@@ -535,13 +536,8 @@ function getRecommendations($user_id)
         while($row = $response->fetch_assoc()){
             $genres[] = $row['genre'];
         }
-    }
-	 
-	 
+    }	 
 	 return array("returnCode" => 1, "genres" => $genres);
-	 
-
-
 }
 
 function getProfileALL($user_id, $follow_id, $viewer_id)
@@ -582,7 +578,7 @@ function getProfileALL($user_id, $follow_id, $viewer_id)
 	 $row = $response->fetch_assoc();
 	 if(empty($row)){
 		 echo "EMPTY";
-	 	return array("returnCode" => "0");
+	 	return array("returnCode" => 0);
 	 }
 	 $email = $row['email'];
 	 $stmt->close();
@@ -601,27 +597,49 @@ function getProfileALL($user_id, $follow_id, $viewer_id)
          if ($response && $response->num_rows > 0) {
 
                 $row = $response->fetch_assoc();
-                return array("returnCode" => "1", "followCode" => "1", "email" => $email, "array" => $all_rows);
+                return array("returnCode" => 1, "followCode" => 1, "email" => $email, "array" => $all_rows);
          }
 
-         return array("returnCode" => "1", "followCode" => "0", "email" => $email, "array" => $all_rows);
+         return array("returnCode" => 1, "followCode" => 0, "email" => $email, "array" => $all_rows);
+
+}
+//gets a list of games based on user input ex: sonic - sonic the hedgehog 1992, sonic cd , .....,etc
+function getGameList($search){
+	//send request to dmz
+	$client = new rabbitMQClient("dmz.ini", "testServer");
+	$request = array( 'type' => 'listGames', 'search' => $search );
+	$response = $client->send_request($request);
+		
+	if($response['returnCode'] == 0){
+		return array("returnCode" => 0, "search" => $search , "message" => "request not found");
+	}else if($response['returnCode'] == 1){
+		return array("returnCode" => 1, "games" => $response['games']);
+	}
+}
+
+//when user wants more information about a game ...
+function getGameDetails($gameId){
+	$client = new rabbitMQClient("dmz.ini", "testServer");
+        $request = array( 'type' => 'details', 'search' => $gameId );
+        $response = $client->send_request($request);
+       // unset($client);
+        if($response['returnCode'] == 0){
+                return array("returnCode" => 0, "search" => $gameId , "message" => "request not found");
+        }
+        return array("returnCode" => 1, "search" => $gameId, "array" => $response);
 
 }
 
-function getGameList($search){
-	//send request to dmz
-	$client = new rabbitMQClient("dmz.ini","testServer");
-	$request = array();
-	$request['type'] = 'listGames';
-	$request['search'] = $search;
-	$response = $client->send_request($request);
-	if($response['returnCode'] == 1){
-		//return data
-		return $response['games'];
-	}else{
-		//return empty for now
-		return array();
-	}
+//recomendations for recomentions.php file
+function getGenre($genre){
+	$client = new rabbitMQClient("dmz.ini", "testServer");
+        $request = array( 'type' => 'recomendGenre', 'search' => $genre );
+        $response = $client->send_request($request);
+        //unset($client);
+        if($response['returnCode'] != 1){
+                return array("returnCode" => 0, "search" => $genre , "message" => "request not found");
+        }
+        return array("returnCode" => 1, "search" => $genre, "array" => $response);
 }
 
 function requestProcessor($request)
@@ -665,8 +683,10 @@ function requestProcessor($request)
              return getProfileAll($request['user_id'], $request['follow_id'], $request['viewer_id']);
      case "listGames":
 	     return getGameList($request['search']);
-
-
+     case "gameDetails":
+	     return getGameDetails($request['gameId']);
+     case "genres":
+	     return getGenres($request['genre']);
 
   }
   return array("returnCode" => '0', 'message'=>"Server received request and processed");
