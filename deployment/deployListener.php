@@ -1,8 +1,8 @@
 #!/usr/bin/php
 <?php
-//require_once('path.inc');
-//require_once('get_host_info.inc');
-//require_once('rabbitMQLib.inc');
+require_once('path.inc');
+require_once('get_host_info.inc');
+require_once('rabbitMQLib.inc');
 
 function doDeploy($version) {
 	$success = true;
@@ -14,9 +14,6 @@ function doDeploy($version) {
 	if ($code != 0) $success = false;
 	return $success;
 }
-
-doDeploy(1.0);
-exit();
 
 function requestProcessor($request) {
   echo "received request".PHP_EOL;
