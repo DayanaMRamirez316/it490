@@ -2,6 +2,7 @@
 if (session_status() == PHP_SESSION_NONE) {
 	session_start();
 }
+
 include_once(__DIR__ . '/../app/navBar.php'); 
 require_once('../app/validateSession.php');
 if (!isset($_SESSION['token']) || empty($_SESSION['token']))
@@ -38,7 +39,7 @@ require_once('../app/rabbitMQLib.inc');
 $searchInput ="";
 $games = array();
 
-print_r($_POST);
+
 if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"]) && $_POST["search"] !="" )
 {
 	$searchInput = $_POST["search"];
@@ -49,7 +50,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"]) && $_POST["se
 	$request['type'] = 'listGames';
 	$request['search'] = $searchInput;
 	$response = $client->send_request($request);
-
 	if($response['returnCode'] == 1){
 		$games = $response['games'];
 		echo "<h2>Video Game List:</h2>";
@@ -99,7 +99,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"]) && $_POST["se
     			echo "</li>";
 		}
 		
-	}else{
-		echo "something went wrong";
 	}
+}
 ?>
