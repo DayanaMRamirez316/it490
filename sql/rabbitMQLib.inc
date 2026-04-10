@@ -260,7 +260,7 @@ class rabbitMQClient
 		{
 			error_log("send_request error:" . $e->getMessage());
 			//die("failed to send message to exchange: ". $e->getMessage()."\n");
-			return array("" => 0, "message" => $e->getMessage());
+			return array("returnCode" => 0, "message" => $e->getMessage());
 		}
 	}
 
