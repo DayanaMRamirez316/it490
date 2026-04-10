@@ -42,7 +42,7 @@ if (empty($response['genres'])){
 	 $genreSlugs = [];
 
 	foreach ($response['genres'] as $genre) {
-    	$genreSlugs[] = strtolower(str_replace(' ', '-', $genre));
+    	$genreSlugs[] = strtolower(str_replace(' ', '-', trim($genre)));
 	}
 
    
@@ -59,6 +59,9 @@ if (empty($response['genres'])){
 		if(isset($response['genre'])){
 			$rawgAPIdata = $response['genre'];
 		}
+	}else{
+		echo "no genres found .";
+		exit();
 	}
 
 	echo "<h2>Video Game Recommendations:</h2>";

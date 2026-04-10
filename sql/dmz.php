@@ -4,6 +4,7 @@ require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 
 function gameSearch($search){
+	echo "searching..\n";
 	$env = parse_ini_file(__DIR__ . '/.env');
 	if(!$env || !isset($env['RAWG_API_KEY'])){
 		return array("returnCode" => 0, "message" => "API key not found in .env file.");
@@ -29,12 +30,14 @@ function gameSearch($search){
 
 	$apiGameData = json_decode($response, true);
 
-	if( !apiGameData || !isset($apiGameData['results'])){
+	if(!$apiGameData || !isset($apiGameData['results'])){
 		return array("returnCode" => 0, "message" => "No results found");
 	}
+	return array("returnCode" => 1, "games" => $apiGameData['results']);
 }
 
 function gameDetails($gameId){
+	echo "getting details ..\n";
 	$env = parse_ini_file(__DIR__ . '/.env');
 
 	if(!$env || !isset($env['RAWG_API_KEY'])){
@@ -73,6 +76,7 @@ function gameDetails($gameId){
 }
 
 function gameGenre($genre){
+	echo "getting genres..\n";
 	$env = parse_ini_file(__DIR__ . '/.env');
 
         if(!$env || !isset($env['RAWG_API_KEY'])){
@@ -81,13 +85,13 @@ function gameGenre($genre){
 
         $apiKey = $env['RAWG_API_KEY'];
 
-        $rawgAPIurl = "https://api.rawg.io/api/games?key=$apiKey&genres=$genre&page_size=100&ordering=-rating";
+        $rawgAPIurl = "https://api.rawg.io/api/games?key=$apiKey&genres=$genre&page_size=10&ordering=-rating";
         $curl = curl_init();
 
         curl_setopt($curl, CURLOPT_URL, $rawgAPIurl);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HTTPGET, true);
-        curl_setopt($curl, CURLOPT_TIMEOUT, 5);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 25);
 
         $response = curl_exec($curl);
 
