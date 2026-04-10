@@ -27,7 +27,6 @@ function getFollowedReviews() {
 }
 
 
-
 $response = getFollowedReviews();
 ?>
 

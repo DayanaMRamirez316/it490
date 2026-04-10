@@ -1,5 +1,5 @@
 #!/bin/bash 
-destDir="/c/Users/annbo/NJIT/IT490/it490"
+cd "$(dirname "$0")/.."
 cd "$destDir"
 find . \( -path "./.git" -o -path "./deployment" \) -prune -o -type f -exec sha256sum --text "{}" \; | sort > ./deployment/newVer.txt
 
@@ -25,10 +25,11 @@ tar -cvf deployment/update.tar -T deployment/deploy.txt
 #bye
 #EOF
 
-# metadata stuff
-
+# metadata
+#create metadata.json with location and version and increment version number for
+#the next deployment 
 currentVersion=$(cat deployment/versionNum.txt)
-echo "Metadata Construction"
+echo "Creating Metadata"
 
 cat > deployment/metadata.json <<EOF
 {
