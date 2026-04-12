@@ -1,16 +1,19 @@
 #!/usr/bin/php
 <?php
-//require_once('path.inc');
-//require_once('get_host_info.inc');
-//require_once('rabbitMQLib.inc');
+require_once('path.inc');
+require_once('get_host_info.inc');
+require_once('rabbitMQLib.inc');
 
 function doDeploy($version) {
+	$success = true;
 	exec("/bin/bash /opt/it490/deployment/deploy.sh $version", $output, $code);
-	echo $output;
-}
+	foreach($output as $line) {
+		echo "$line \n";
+	}
 
-doDeploy(1.0);
-exit();
+	if ($code != 0) $success = false;
+	return $success;
+}
 
 function requestProcessor($request) {
   echo "received request".PHP_EOL;
@@ -23,7 +26,7 @@ function requestProcessor($request) {
   switch($type)
   {
   case "deploy":
-	$ok = doLogin($request['version']);
+	$ok = doDeploy($request['version']);
 	if ($ok) {
 	    return array(
 		   "ok" => true,

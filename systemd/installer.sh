@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #!/bin/bash
 # no matter where the script would run, move to the root of the project 
 cd "$(dirname "$0")/.."
@@ -28,3 +29,8 @@ echo "update.tar found"
 tar -xf "$fileLocation" #extract update.tar
 echo "Unpacked update.tar"
 echo "Deployment done"
+=======
+#!/bin/bash
+cd /opt/it490/sql
+php installer.php
+>>>>>>> origin/deployment_scripting
