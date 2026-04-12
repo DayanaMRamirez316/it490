@@ -1,0 +1,16 @@
+{
+  "file_location": "/deployment/update.tar",
+    "version": ""
+}
+EOF 
+
+echo "metadata.json created with version: "
+nextVersion=1
+echo  > baseVer.txt
+
+echo "Updated version to  in baseVer.txt"
+
+mv deployment/newVer.txt deployment/baseVer.txt
+
+rm deployment/deploy.txt
+
