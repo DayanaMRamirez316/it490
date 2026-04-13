@@ -637,8 +637,10 @@ function getGenre($genre){
         if($response['returnCode'] == 0){
                 return array("returnCode" => 0, "message" => "request not found");
 	}
-
-        return array("returnCode" => 1, "genre" => $response['genre'] );
+//	var_dump($response);
+	echo "retirived";
+	return array("returnCode" => 1, "genre" => $response['genre']);
+	
 }
 
 function handleMetadataDeploy($request)

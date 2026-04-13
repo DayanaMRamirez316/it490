@@ -10,7 +10,9 @@ function Install($bundleName, $version, $bundlePath){
 	//copy and direct it to /var/www/sample
 	//run command to restart apache2
 	//send message that install was succesful
-
+	//
+	//BUNDLEPATH : /FRONTEND/VERSION#/
+	//need several direcories
 	//deployment server ip
 	$server = "100.125.53.7";
 	//your username and password
