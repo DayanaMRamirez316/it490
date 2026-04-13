@@ -12,6 +12,6 @@ rsync -avz "$SOURCE/sample/" "$DEST/sample/"
 rsync -avz "$SOURCE/sql/" "$DEST/sql/"
 
 cp "$SOURCE/001-sample.conf" "$DEST/"
-cp "$SOURCE/local.inf" "$DEST/"
+cp "$SOURCE/local.ini" "$DEST/"
 
 echo "Bundle $VERSION created successfully at $DEST"
