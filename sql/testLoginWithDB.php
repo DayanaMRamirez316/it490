@@ -11,9 +11,7 @@ require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 
-
-$mydb = new mysqli('127.0.0.1','userInfo','theBestPassword','data');
-
+$mydb = new mysqli('127.0.0.1','userInfo','TheBestPassword123!','data');
 
 if ($mydb->errno != 0)
 {
@@ -643,6 +641,21 @@ function getGenre($genre){
         return array("returnCode" => 1, "genre" => $response['genre'] );
 }
 
+function handleMetadataDeploy($request)
+{
+	echo "Deployment metadata is recieved\n";
+	print_r($request);
+	$installerPath = __DIR__ . "/../systemd/installer.sh";
+	$output = shell_exec("bash " . escapeshellarg($installerPath) . " 2>&1");
+	echo "Installer output:\n";
+	echo $output;
+	return[
+		"returnCode" => "0",
+		"message" => "Recieved Deployment Metadata",
+		"file_location" => $request["file_location"] ?? "",
+		"version" => $request["version"] ?? ""];
+}
+
 function requestProcessor($request)
 //this function processes the requests from the frontend. the type of the request is checked and then it is called. 
 {
@@ -688,6 +701,8 @@ function requestProcessor($request)
 	     return getGameDetails($request['gameId']);
      case "genres":
 	     return getGenre($request['genre']);
+     case "deployment_metadata":
+	     return handleMetadataDeploy($request); 
 
   }
   return array("returnCode" => '0', 'message'=>"Server received request and processed");
