@@ -1,0 +1,11 @@
+.loginForm{
+background: lightblue;
+padding: 40px;
+border-radius: 20px; 
+width: 320px;
+margin: auto; 
+}
+
+.signUp{
+    text-align: center; 
+}
