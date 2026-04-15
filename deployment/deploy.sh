@@ -17,26 +17,18 @@ sort -u deployment/deploy.txt -o deployment/deploy.txt
 
 awk '{ gsub(/^\.\//, "", $0); print "./"$0 "|" "/opt/it490/" $0 }' deployment/deploy.txt > deployment/manifest.txt
 
-tar -cvf deployment/package.tar -T deployment/deploy.txt deployment/manifest.txt
+tar -cvf deployment/"version_${1}".tar -T deployment/deploy.txt deployment/manifest.txt
 
-#ftp -inv #insert deploy server ip
-#<<EOF 
-#user your_username your_password
-#binary
-#put deployment/update.tar
-#bye
-#EOF
+ftp -inv insert deploy server ip <<EOF 
+user your_username your_password
+binary
+put deployment/update.tar
+bye
+EOF
 
 # metadata stuff
 
 echo "Metadata Construction"
-
-cat > deployment/metadata.json <<EOF
-{
-  "file_location": "/deployment/update.tar",
-  "version": "$1"
-}
-EOF
 
 echo "metadata.json created with version: $currentVersion"
 
