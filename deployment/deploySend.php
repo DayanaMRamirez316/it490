@@ -17,8 +17,8 @@ else
 $request = array();
 $request['type'] = "deploy";
 $request['version'] = "1.0";
-$response = $client->publish($request, "dev");
-//$response = $client->publish($request);
+//$response = $client->send_request($request, "dev");
+$response = $client->publish($request);
 
 echo "client received response: ".PHP_EOL;
 print_r($response);
