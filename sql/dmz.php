@@ -79,37 +79,48 @@ function gameGenre($genre){
 	echo "getting genres..\n";
 	$env = parse_ini_file(__DIR__ . '/.env');
 
-        if(!$env || !isset($env['RAWG_API_KEY'])){
+	if(!$env || !isset($env['RAWG_API_KEY'])){
+		echo "API key not found";
                 return array("returnCode" => 0, "message" => "API key not found in .env file");
         }
 
-        $apiKey = $env['RAWG_API_KEY'];
+	$apiKey = $env['RAWG_API_KEY'];
 
-        $rawgAPIurl = "https://api.rawg.io/api/games?key=$apiKey&genres=$genre&page_size=10&ordering=-rating";
+	$encodeGenre = urlencode($genre);
+
+        $rawgAPIurl = "https://api.rawg.io/api/games?key=$apiKey&genres=$encodeGenre&page_size=100&ordering=-rating";
         $curl = curl_init();
 
         curl_setopt($curl, CURLOPT_URL, $rawgAPIurl);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HTTPGET, true);
-        curl_setopt($curl, CURLOPT_TIMEOUT, 10);
+	curl_setopt($curl, CURLOPT_TIMEOUT, 15);
+	curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+	//curl_setopt($curl, CURLOPT_VERBOSE, true);
 
         $response = curl_exec($curl);
 
-        if(curl_errno($curl)){
-                $error = curl_error($curl);
+	if(curl_errno($curl)){
+		$error = curl_error($curl);
+		echo "CURL Error (" . curl_errno($curl) . "): " . $error . "\n";
                 curl_close($curl);
                 return array("returnCode" => 0, "message" => "Curl error: " . $error );
         }
+
+	$httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+	//echo "HTTP CODE: " . $httpCode . "\n";
 
         curl_close($curl);
 
 	$rawgAPIdata = json_decode($response, true);
 
-	if(!$rawgAPIdata || !isset($rawgAPIdata['results'])){
+	if(!$rawgAPIdata || !isset($rawgAPIdata['results']) || empty($rawgAPIdata['results'])){
+		echo "no results";
                 return array("returnCode" => 0, "message" => "No results found");
         }
 
-        echo "Details found \n";
+	echo "Details found \n";
+	
         return array("returnCode" => 1, "genre" => $rawgAPIdata['results']);
 
 }

@@ -11,7 +11,7 @@ require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 
-$mydb = new mysqli('127.0.0.1','userInfo','TheBestPassword123!','data');
+$mydb = new mysqli('127.0.0.1','userInfo','theBestPassword','data');
 
 if ($mydb->errno != 0)
 {
@@ -493,17 +493,19 @@ function getRecommendations($user_id)
 //that have an average rating of 75 or higher. If there are no genres with an average rating of 75 or higher, 
 //it returns the top 3 genres with the highest average rating.
 {
+	error_log("=== get recomendations : ". $user_id . " ===");
+	global $mydb;
+	error_log("Query database for user genres");
 
-	 global $mydb;
          $query = "SELECT Games.genre, AVG(User_Reviews.rating) FROM User_Reviews JOIN Games ON User_Reviews.game_id = Games.game_id WHERE User_Reviews.user_id = ? GROUP BY Games.genre HAVING AVG(User_Reviews.rating) > 75";
          $stmt = $mydb->prepare($query);
          $stmt->bind_param('i', $user_id);
 
-         if (!$stmt->execute())
-{
-            echo "failed to execute query:".PHP_EOL;
-            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
-            return array("returnCode" => 2, "message" => "db error");
+	 if (!$stmt->execute()){
+		error_log("DB failed: " . $mydb->error);
+		//echo "failed to execute query:".PHP_EOL;
+            	//echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+            	return array("returnCode" => 2, "message" => "db error");
 	 }
 
 	 $response = $stmt->get_result();
@@ -515,27 +517,78 @@ function getRecommendations($user_id)
 	 }
 
 	 $stmt->close();
-
+	 error_log("Found" . count($genres) . "genres from DB");
+	 
 	 if(count($genres) == 0){
+		 error_log("genres calculating getting top 3");
 
         	$query = "SELECT Games.genre, AVG(User_Reviews.rating) AS avg_rating FROM User_Reviews JOIN Games ON User_Reviews.game_id = Games.game_id WHERE User_Reviews.user_id = ? GROUP BY Games.genre ORDER BY avg_rating DESC LIMIT 3";
 
         $stmt = $mydb->prepare($query);
         $stmt->bind_param('i', $user_id);
 
-        if (!$stmt->execute()){
-            echo "failed to execute query:".PHP_EOL;
-            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+	if (!$stmt->execute()){
+		error_log("Second DB failed: " . $mydb->error);
+            //echo "failed to execute query:".PHP_EOL;
+            //echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
             return array("returnCode" => 2, "message" => "db error /session not valid");
         }
 
         $response = $stmt->get_result();
 
         while($row = $response->fetch_assoc()){
-            $genres[] = $row['genre'];
-        }
-    }	 
-	 return array("returnCode" => 1, "genres" => $genres);
+		$genres[] = $row['genre'];
+	}
+	$stmt->close();
+	error_log("FOUND " . count($genres) . " genres from top 3");
+	}	
+
+	 //No genres return empty array
+	 if(count($genres) == 0){
+		 error_log("No genres found at all for user" );
+		 return array("returnCode" => 1, "genres" => array(), "games" => array());
+	 }
+
+	 $genreSlugs = [];
+	 foreach($genres as $genre){
+		 $genreSlugs[] = strtolower(str_replace(' ','-', trim($genre)));
+	 }
+
+	 $genreParam = implode(',', $genreSlugs);
+	 error_log("Genre param for DMZ: " . $genreParam);
+	 error_log("Calling DMZ server");
+	 
+	$client = new rabbitMQClient("dmz.ini", "testServer");
+        $dmzRequest = array( 'type' => 'recomendGenre', 'genre' => $genreParam );
+	$dmzResponse = $client->send_request($dmzRequest);
+
+	//error_log("DMZ response recived. Return code: " . print_r($dmzResponse, true));
+
+	if($dmzResponse['returnCode'] == 1 && isset($dmzResponse['genre'])){
+		error_log("DMZ recived " . count($dmzResponse['genre']) . " games");
+		$returnData = array(
+			"returnCode" => 1,
+			"genres" => $genres,
+			"games" => $dmzResponse['genre']
+		);
+		//error_log("=== returning data to client ===" );
+		//error_log("Return data keys: " . implode(', ', array_keys($returnData)));
+		//error_log("Number of games: " . count($returnData['games']));
+
+		return $returnData;
+	}else{
+		$returnData = array(
+			"returnCode" => 0,
+			"genres" => array(),
+			"message" => "somethng whent wrong"
+		);
+		return $returnData;
+	}
+       //var_dump($response);
+        //echo "retirived";
+        //return array("returnCode" => 1, "genre" => $response['genre']);
+
+	 //return array("returnCode" => 1, "genres" => $genres);
 }
 
 function getProfileALL($user_id, $follow_id, $viewer_id)
@@ -717,4 +770,3 @@ $server->process_requests('requestProcessor');
 echo "testRabbitMQServer END".PHP_EOL;
 exit();
 ?>
-
