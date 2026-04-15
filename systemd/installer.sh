@@ -18,13 +18,13 @@ echo "Succes in reading the metadata. Deployment file location: $fileLocation"
 echo "Version: $version" 
 
 #does tar exit
-if [ ! -f "deployment/update.tar" ]; then
-    echo "update.tar not found."
+if [ ! -f "$fileLocation" ]; then
+    echo "package.tar not found."
     exit 1
 fi
-echo "update.tar found"
+echo "package.tar found"
 
 
-tar -xf "$fileLocation" #extract update.tar
-echo "Unpacked update.tar"
+tar -xf "$fileLocation" #extract package.tar
+echo "Unpacked package.tar"
 echo "Deployment done"

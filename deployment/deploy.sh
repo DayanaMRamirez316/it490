@@ -41,7 +41,7 @@ echo "Metadata Construction"
 
 cat > deployment/metadata.json <<EOF
 {
-  "file_location": "/deployment/update.tar",
+  "file_location": "/deployment/package.tar",
   "version": "$1"
 }
 EOF
