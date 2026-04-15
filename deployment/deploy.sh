@@ -24,7 +24,7 @@ tar -cvf deployment/"$filename" -T deployment/deploy.txt deployment/manifest.txt
 ftp -inv 100.125.53.7 <<EOF 
 user dmr49 Michi100
 binary
-put deployment/"$filename"
+put deployment/"$filename" /opt/it490/deployment/"$filename"
 bye
 EOF
 

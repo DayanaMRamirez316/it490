@@ -1,6 +1,6 @@
 #!/bin/bash
 
-archive="deployment/package.tar"
+archive="deployment/version_1.0.tar"
 manifest="deployment/manifest.txt"
 tmpdir=$(mktemp -d)
 
