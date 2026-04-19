@@ -17,7 +17,7 @@ version=$(grep 'version' "$metadataFile" | cut -d '"' -f 4)
 echo "Succes in reading the metadata. Deployment file location: $fileLocation"
 echo "Version: $version" 
 
-#does tar exist
+#does tar exitst
 if [ ! -f "$fileLocation" ]; then
     echo "package.tar not found."
     exit 1
