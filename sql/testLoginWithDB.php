@@ -696,7 +696,6 @@ function getGenre($genre){
 	
 }
 
-echo "HANDLED BY DB1\n";
 function handleMetadataDeploy($request)
 {
 	echo "Deployment metadata is recieved\n";
