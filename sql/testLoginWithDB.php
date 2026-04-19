@@ -11,7 +11,7 @@ require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 
-$mydb = new mysqli('127.0.0.1','userInfo','theBestPassword','data');
+$mydb = new mysqli('127.0.0.1','userInfo','TheBestPassword123!','data');
 
 if ($mydb->errno != 0)
 {
@@ -696,6 +696,7 @@ function getGenre($genre){
 	
 }
 
+echo "HANDLED BY DB1\n";
 function handleMetadataDeploy($request)
 {
 	echo "Deployment metadata is recieved\n";

@@ -24,7 +24,7 @@ tar -cvf deployment/package.tar -T deployment/deploy.txt deployment/manifest.txt
 #<<EOF 
 #user your_username your_password
 #binary
-#put deployment/update.tar
+#put deployment/package.tar
 #bye
 #EOF
 
