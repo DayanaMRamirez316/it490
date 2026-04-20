@@ -1,39 +1,25 @@
-#!/bin/bash 
-destDir="/opt/it490/"
-cd "$destDir"
-find . \( -path "./.git" -o -path "./deployment" \) -prune -o -type f -exec sha256sum --text "{}" \; | sort > ./deployment/newVer.txt
+#!/bin/bash
 
-join -j 2 \
-    <(awk '{ path=substr($0, index($0,$2)); sub(/^\*/, "", path); print $1, path }' deployment/baseVer.txt | sort -k2,2) \
-    <(awk '{ path=substr($0, index($0,$2)); sub(/^\*/, "", path); print $1, path }' deployment/newVer.txt | sort -k2,2) \
-| awk '$2 != $3 {print $1}' > deployment/deploy.txt
+archive="deployment/version_1.0.tar"
+manifest="deployment/manifest.txt"
+tmpdir=$(mktemp -d)
 
-comm -13 \
-    <(awk '{ path=substr($0, index($0,$2)); sub(/^\*/, "", path); print path }' deployment/baseVer.txt | sort) \
-    <(awk '{ path=substr($0, index($0,$2)); sub(/^\*/, "", path); print path }' deployment/newVer.txt | sort) \
->> deployment/deploy.txt
+tar -xf "$archive" -C "$tmpdir" "$manifest" || {
+    echo "Failed to extract manifest"
+    rm -rf "$tmpdir"
+    exit 1
+}
 
-sort -u deployment/deploy.txt -o deployment/deploy.txt
+while IFS='|' read -r archived_file final_path; do
+    [ -z "$archived_file" ] && continue
 
-awk '{ gsub(/^\.\//, "", $0); print "./"$0 "|" "/opt/it490/" $0 }' deployment/deploy.txt > deployment/manifest.txt
+    tar -xf "$archive" -C "$tmpdir" "$archived_file" || exit 1
 
-filename="version_${1}.tar"
+    mkdir -p "$(dirname "$final_path")" || exit 1
+    cp -f "$tmpdir/$archived_file" "$final_path" || exit 1
+    echo "looped"
+done < "$manifest"
 
-tar -cvf deployment/"$filename" -T deployment/deploy.txt deployment/manifest.txt
+rm -rf "$tmpdir"
 
-ftp -inv 100.125.53.7 <<EOF 
-user dmr49 Michi100
-binary
-put deployment/"$filename" /opt/it490/deployment/"$filename"
-bye
-EOF
-
-# metadata stuff
-
-echo "Metadata Construction"
-
-echo "metadata.json created with version: $currentVersion"
-
-mv deployment/newVer.txt deployment/baseVer.txt
-
-rm -f deployment/deploy.txt
+echo "all done"

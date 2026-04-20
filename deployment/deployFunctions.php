@@ -7,6 +7,14 @@ require_once('rabbitMQLib.inc');
 
 function transmitPackage(rabbitMQClient $client) {
   $request = array();
+  $request['type'] = "package";
+  $request['version'] = "1.0";
+  $response = $client->publish($request, "dev");
+  return $response;
+}
+
+function transmitDeploy(rabbitMQClient $client) {
+  $request = array();
   $request['type'] = "deploy";
   $request['version'] = "1.0";
   $response = $client->publish($request, "dev");
