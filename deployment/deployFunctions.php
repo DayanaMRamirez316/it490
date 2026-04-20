@@ -26,9 +26,11 @@ function transmitPackage(rabbitMQClient $client) {
   $request['type'] = "package";
   $request['version'] = "newVer";
   $response = $client->publish($request, "dev");
+  $query = "INSERT INTO deployment_packages (packageName, version, status, created_by) VALUES (?, ?, \"untested\", \"mgb46\")";
+  $stmt = $mydb->prepare($query);
+  $stmt->bind_param('ss', "version_$nerVer.tar", $nerVer);
+  $stmt->execute();
   return $response;
-
-  $query = "INSERT INTO deployment_packages (packageName, version, status, created_by) VALUES (\"version_$newVer.tar\", $newVer, \"untested\", \"mgb46\")";
 }
 
 function transmitDeploy(rabbitMQClient $client) {

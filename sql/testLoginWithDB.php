@@ -35,7 +35,7 @@ function doLogin($email,$password)
         return array("returnCode" => "2", "message" => "Failed to prepare statement");
     }
 
-    $stmt->bind_param('s', $email);  
+    $stmt->bind_param('s', $email);
 
     if (!$stmt->execute())
 {
