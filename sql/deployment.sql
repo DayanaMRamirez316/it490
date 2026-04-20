@@ -5,7 +5,7 @@
 create table if not exists deployment_packages (
     packageID int not null auto_increment,
     packageName varchar(255) not null,
-    version varchar(50) not null,
+    version float not null,
     status varchar(50) not null default 'NEW',
     created_by varchar(100) not null,
     created_at timestamp not null default current_timestamp,

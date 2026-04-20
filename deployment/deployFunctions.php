@@ -4,13 +4,31 @@ require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 
+$mydb = new mysqli('127.0.0.1','userInfo','theBestPassword','deployDB');
+
+if ($mydb->errno != 0)
+{
+	echo "failed to connect to database: ". $mydb->error . PHP_EOL;
+	exit(0);
+}
+
+echo "successfully connected to database".PHP_EOL;
 
 function transmitPackage(rabbitMQClient $client) {
+  global $mydb;
+  $query = "SELECT ROUND(MAX(version) + 0.01, 2) AS newVer FROM deployment_packages";
+  $stmt = $mydb->prepare($query);
+  $stmt->execute();
+  $row = $result->fetch_assoc();
+  $newVer = $row['newVer'];
+
   $request = array();
   $request['type'] = "package";
-  $request['version'] = "1.0";
+  $request['version'] = "newVer";
   $response = $client->publish($request, "dev");
   return $response;
+
+  $query = "INSERT INTO deployment_packages (packageName, version, status, created_by) VALUES (\"version_$newVer.tar\", $newVer, \"untested\", \"mgb46\")";
 }
 
 function transmitDeploy(rabbitMQClient $client) {
