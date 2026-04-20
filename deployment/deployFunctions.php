@@ -10,6 +10,7 @@ function transmitPackage(rabbitMQClient $client) {
   $request['type'] = "deploy";
   $request['version'] = "1.0";
   $response = $client->publish($request, "dev");
+  return $response;
 }
 
 $client = new rabbitMQClient("deploy.ini","testServer");
@@ -17,7 +18,7 @@ $command = strtolower($argv[1]);
 
 switch ($command) {
   case "pack":
-    transmitPackage($client);
+    $response = transmitPackage($client);
 }
 echo "client received response: ".PHP_EOL;
 print_r($response);
