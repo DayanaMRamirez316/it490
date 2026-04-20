@@ -32,6 +32,10 @@ class rabbitMQServer
 		{
 			$this->auto_delete = $this->machine[$server]["AUTO_DELETE"];
 		}
+		if (isset( $this->machine[$server]["ROUTING_KEY"]))
+		{
+			$this->routing_key = $this->machine[$server]["ROUTING_KEY"];
+		}
 		$this->exchange = $this->machine[$server]["EXCHANGE"];
 		$this->queue = $this->machine[$server]["QUEUE"];
 	}

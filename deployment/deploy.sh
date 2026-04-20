@@ -17,12 +17,14 @@ sort -u deployment/deploy.txt -o deployment/deploy.txt
 
 awk '{ gsub(/^\.\//, "", $0); print "./"$0 "|" "/opt/it490/" $0 }' deployment/deploy.txt > deployment/manifest.txt
 
-tar -cvf deployment/"version_${1}".tar -T deployment/deploy.txt deployment/manifest.txt
+filename="version_${1}.tar"
 
-ftp -inv insert deploy server ip <<EOF 
-user your_username your_password
+tar -cvf deployment/"$filename" -T deployment/deploy.txt deployment/manifest.txt
+
+ftp -inv 100.125.53.7 <<EOF 
+user dmr49 Michi100
 binary
-put deployment/update.tar
+put deployment/"$filename" /opt/it490/deployment/"$filename"
 bye
 EOF
 
