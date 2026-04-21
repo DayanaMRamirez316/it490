@@ -4,7 +4,7 @@ require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 
-$mydb = new mysqli('127.0.0.1','userInfo','theBestPassword','deployDB');
+$mydb = new mysqli('127.0.0.1','deployer','deployPwd!','deployDB');
 
 if ($mydb->errno != 0)
 {
