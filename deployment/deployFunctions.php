@@ -27,7 +27,7 @@ function transmitPackage(rabbitMQClient $client) {
   $request['type'] = "package";
   $request['version'] = "newVer";
   $response = $client->publish($request, "dev");
-  
+
   $query = "INSERT INTO deployment_packages (packageName, version, status, created_by) VALUES (?, ?, \"untested\", \"mgb46\")";
   $stmt = $mydb->prepare($query);
   $stmt->bind_param('ss', $filename, $newVer);
@@ -49,6 +49,8 @@ $command = strtolower($argv[1]);
 switch ($command) {
   case "pack":
     $response = transmitPackage($client);
+  case "deploy":
+    $response = transmitDeploy($client);
 }
 echo "client received response: ".PHP_EOL;
 print_r($response);
