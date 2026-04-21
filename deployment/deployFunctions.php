@@ -18,17 +18,19 @@ function transmitPackage(rabbitMQClient $client) {
   global $mydb;
   $query = "SELECT ROUND(MAX(version) + 0.01, 2) AS newVer FROM deployment_packages";
   $stmt = $mydb->prepare($query);
-  $stmt->execute();
+  $result = $stmt->get_result();
   $row = $result->fetch_assoc();
   $newVer = $row['newVer'];
+  $filename = "version_$newVer.tar";
 
   $request = array();
   $request['type'] = "package";
   $request['version'] = "newVer";
   $response = $client->publish($request, "dev");
+  
   $query = "INSERT INTO deployment_packages (packageName, version, status, created_by) VALUES (?, ?, \"untested\", \"mgb46\")";
   $stmt = $mydb->prepare($query);
-  $stmt->bind_param('ss', "version_$nerVer.tar", $nerVer);
+  $stmt->bind_param('ss', $filename, $newVer);
   $stmt->execute();
   return $response;
 }
