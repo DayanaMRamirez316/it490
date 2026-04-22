@@ -243,8 +243,9 @@ class rabbitMQClient
 
 	  @param message the body of the request.  This must make sense to the
 	  server
+	  @param rtkey Routing key, if specified
 	 */
-	function publish($message)
+	function publish($message, $rtKey = '*')
 	{
 		$json_message = json_encode($message);
 		try
@@ -263,8 +264,8 @@ class rabbitMQClient
       $exchange->setType($this->exchange_type);
 			$this->conn_queue = new AMQPQueue($channel);
 			$this->conn_queue->setName($this->queue);
-			$this->conn_queue->bind($exchange->getName(),$this->routing_key);
-			return $exchange->publish($json_message,$this->routing_key);
+			$this->conn_queue->bind($exchange->getName(),$rtKey);
+			return $exchange->publish($json_message,$rtKey);
 		}
 		catch(Exception $e)
 		{

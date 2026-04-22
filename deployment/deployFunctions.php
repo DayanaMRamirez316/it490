@@ -3,19 +3,37 @@
 require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
+/**
+ * Handles all deployment server main functions
+ * 
+ * Packaging, deploying, and rollback are all handled in this document, by calling different functions.
+ * All functions use RMQ to transmit commands to the various clusters
+ * 
+ */
 
-$mydb = new mysqli('127.0.0.1','deployer','deployPwd!','deployDB');
+// Called upon for connection to mySQL database
+function dbConnect() {
+  $mydb = new mysqli('127.0.0.1','deployer','deployPwd!','deployDB');
+  
+  if ($mydb->errno != 0) {
+	  echo "failed to connect to database: " . $mydb->error . PHP_EOL;
+	  exit(0);
+  }
 
-if ($mydb->errno != 0)
-{
-	echo "failed to connect to database: ". $mydb->error . PHP_EOL;
-	exit(0);
+  echo "successfully connected to database" . PHP_EOL;
+  return $mydb;
 }
 
-echo "successfully connected to database".PHP_EOL;
-
-function transmitPackage(rabbitMQClient $client) {
-  global $mydb;
+/**
+ * Handles packaging of VMs
+ * 
+ * Sends a JSON of type "package" through RMQ to all listening PROD VMs,
+ * creates new version number for package, and inserts new fields in DB
+ * @param rabbitMQClient $client The RMQ client, with it's various functions
+ * @param mysqli $mydb The database client, with it's various functions
+ * @return string[] Returns an array of strings, formatted in JSON
+ */
+function transmitPackage(rabbitMQClient $client, mysqli $mydb) {
   $query = "SELECT ROUND(MAX(version) + 0.01, 2) AS newVer FROM deployment_packages";
   $stmt = $mydb->prepare($query);
   $result = $stmt->get_result();
@@ -43,12 +61,13 @@ function transmitDeploy(rabbitMQClient $client) {
   return $response;
 }
 
+$mydb = dbConnect();
 $client = new rabbitMQClient("deploy.ini","testServer");
 $command = strtolower($argv[1]);
 
 switch ($command) {
   case "pack":
-    $response = transmitPackage($client);
+    $response = transmitPackage($client, $mydb);
   case "deploy":
     $response = transmitDeploy($client);
 }
