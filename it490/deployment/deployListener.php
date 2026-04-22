@@ -15,6 +15,18 @@ function doDeploy($version) {
 	return $success;
 }
 
+function doRollback($version) {
+	$success = true;
+	exec("/bin/bash /opt/it490/deployment/rollback.sh $version", $output, $code);
+
+	foreach($output as $line) {
+		echo "$line \n";
+	}
+
+	if ($code != 0) $success = false;
+	return $success;
+}
+
 function requestProcessor($request) {
   echo "received request".PHP_EOL;
   var_dump($request);
@@ -23,6 +35,8 @@ function requestProcessor($request) {
     return "ERROR: unsupported message type";
   }
   $type=strtolower($request['type']);	
+  $version = $request['version'];
+
   switch($type)
   {
   case "deploy":
@@ -33,6 +47,8 @@ function requestProcessor($request) {
        		   "message" => "Successfully Deployed"
 	    );
 	}
+	case "rollback";
+	$ok = doRollback
 	else{
 	    return array(
 	           "ok" => false,
