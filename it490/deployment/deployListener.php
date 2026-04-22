@@ -47,8 +47,11 @@ function requestProcessor($request) {
        		   "message" => "Successfully Deployed"
 	    );
 	}
-	case "rollback";
-	$ok = doRollback
+  case "rollback";
+	$ok = doRollback ($version);
+	    return array(
+	        "ok" => false,
+		   	   "message" => "Successfully rolled back!"
 	else{
 	    return array(
 	           "ok" => false,
