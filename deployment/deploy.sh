@@ -12,13 +12,13 @@ deploydir="/opt/it490/deployment"
 archive="$deploydir/$filename"
 tmpdir=$(mktemp -d)
 manifest="manifest.txt"
-manifest_path="$tmpdir/$manifest"
+manifest_path="deployment/$manifest"
 
 #downloads file
 ftp -inv 100.125.53.7 <<EOF 
 user dmr49 Michi100
 binary
-cd /home/dmr49/deployment
+cd deployment
 lcd $deploydir
 get $filename "$archive"
 bye
@@ -31,7 +31,7 @@ EOF
 }
 
 #extracts manifest from archive, checks if it exists, exits if not
-tar -xf "$archive" -C "$tmpdir" "$manifest" || {
+tar -xf "$archive" -C "$tmpdir" "$manifest_path" || {
     echo "Failed to extract manifest"
     cleanup_and_exit
 }
@@ -43,8 +43,9 @@ while IFS='|' read -r archived_file final_path; do
 
     mkdir -p "$(dirname "$final_path")" || cleanup_and_exit
     cp -f "$tmpdir/$archived_file" "$final_path" || cleanup_and_exit
-    echo "looped"
+    echo "$archived_file : $final_path"
 done < "$manifest_path"
 
 rm -rf "$tmpdir"
+rm -f "$archive"
 echo "all done"
