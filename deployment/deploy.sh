@@ -1,25 +1,50 @@
 #!/bin/bash
 
-archive="deployment/version_1.0.tar"
-manifest="deployment/manifest.txt"
-tmpdir=$(mktemp -d)
-
-tar -xf "$archive" -C "$tmpdir" "$manifest" || {
-    echo "Failed to extract manifest"
+#cleanup tempDir and exit out of code
+cleanup_and_exit() {
     rm -rf "$tmpdir"
     exit 1
+}
+
+#path variables
+filename="version_${1}.tar"
+deploydir="/opt/it490/deployment"
+archive="$deploydir/$filename"
+tmpdir=$(mktemp -d)
+manifest="manifest.txt"
+manifest_path="$tmpdir/$manifest"
+
+#downloads file
+ftp -inv 100.125.53.7 <<EOF 
+user dmr49 Michi100
+binary
+cd /home/dmr49/deployment
+lcd $deploydir
+get $filename "$archive"
+bye
+EOF
+
+#checks for download, exits if failed
+[ -f "$archive" ] || {
+    echo "FTP failed: $archive not found"
+    cleanup_and_exit
+}
+
+#extracts manifest from archive, checks if it exists, exits if not
+tar -xf "$archive" -C "$tmpdir" "$manifest" || {
+    echo "Failed to extract manifest"
+    cleanup_and_exit
 }
 
 while IFS='|' read -r archived_file final_path; do
     [ -z "$archived_file" ] && continue
 
-    tar -xf "$archive" -C "$tmpdir" "$archived_file" || exit 1
+    tar -xf "$archive" -C "$tmpdir" "$archived_file" || cleanup_and_exit
 
-    mkdir -p "$(dirname "$final_path")" || exit 1
-    cp -f "$tmpdir/$archived_file" "$final_path" || exit 1
+    mkdir -p "$(dirname "$final_path")" || cleanup_and_exit
+    cp -f "$tmpdir/$archived_file" "$final_path" || cleanup_and_exit
     echo "looped"
-done < "$manifest"
+done < "$manifest_path"
 
 rm -rf "$tmpdir"
-
 echo "all done"
