@@ -36,6 +36,7 @@ function dbConnect() {
 function transmitPackage(rabbitMQClient $client, mysqli $mydb) {
   $query = "SELECT ROUND(MAX(version) + 0.01, 2) AS newVer FROM deployment_packages";
   $stmt = $mydb->prepare($query);
+  $stmt->execute();
   $result = $stmt->get_result();
   $row = $result->fetch_assoc();
   $newVer = $row['newVer'];
@@ -43,8 +44,8 @@ function transmitPackage(rabbitMQClient $client, mysqli $mydb) {
 
   $request = array();
   $request['type'] = "package";
-  $request['version'] = "newVer";
-  $response = $client->publish($request, "dev");
+  $request['version'] = "$newVer";
+  $response = $client->publish_to_exchange($request, "dev");
 
   $query = "INSERT INTO deployment_packages (packageName, version, status, created_by) VALUES (?, ?, \"untested\", \"mgb46\")";
   $stmt = $mydb->prepare($query);
@@ -53,11 +54,11 @@ function transmitPackage(rabbitMQClient $client, mysqli $mydb) {
   return $response;
 }
 
-function transmitDeploy(rabbitMQClient $client) {
+function transmitDeploy(rabbitMQClient $client, $version) {
   $request = array();
   $request['type'] = "deploy";
-  $request['version'] = "1.0";
-  $response = $client->publish($request, "dev");
+  $request['version'] = "$version";
+  $response = $client->publish_to_exchange($request, "dev");
   return $response;
 }
 
@@ -68,8 +69,11 @@ $command = strtolower($argv[1]);
 switch ($command) {
   case "pack":
     $response = transmitPackage($client, $mydb);
+    break;
   case "deploy":
-    $response = transmitDeploy($client);
+    $version = $argv[2];
+    $response = transmitDeploy($client, $version);
+    break;
 }
 echo "client received response: ".PHP_EOL;
 print_r($response);
