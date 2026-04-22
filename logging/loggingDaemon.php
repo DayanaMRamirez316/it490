@@ -1,21 +1,22 @@
-#!/usr/bin/php
+ #!/usr/bin/php
 <?php
 require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 
-function doLogin($email,$password)
+
+
+
+function doLog($request)
+
 {
-	if($email == "test" && $password == "test")
-		return true;
-    // lookup username in databas
-    // check password
-	if ($email == "test" && $password == "test")
-		return true;
-	else
-		return false;
-    //return false if not valid
+    $logLine = "[" . $request['timestamp'] . "] [" . $request['level'] . "] [" . $request['vm'] 
+		. "] [" . $request['service'] . "] " . $request['message'] . "\n";
+
+     file_put_contents('/var/log/it490/app.log', $logLine, FILE_APPEND);
 }
+
+
 
 function requestProcessor($request)
 {
@@ -28,27 +29,20 @@ function requestProcessor($request)
   $type=strtolower($request['type']);
   switch($type)
   {
-  case "login":
-	$ok = doLogin($request['email'], $request ['password']);
-	if ($ok) {
-	    return array(
-		   "returnCode" => 1,
-       		   "message" => "Login accepted"
-	    );
-	}
-	else{
-	    return array(
-	           "returnCode" => 0,
-		   "message" => "Login denied"
-	    );
-	}
-  }
-}
-$server = new rabbitMQServer("logging.ini","logger");
+  
+   case "log":
+            
+	doLog($request);
+            return array("returnCode" => 1, "message" => "log written");
+    }
 
-echo "testRabbitMQServer BEGIN".PHP_EOL;
+    return array("returnCode" => 0, "message" => "unsupported request type");
+}
+
+$server = new rabbitMQServer("logging.ini","testServer");
+
+echo "loggingDaemon BEGIN".PHP_EOL;
 $server->process_requests('requestProcessor');
-echo "testRabbitMQServer END".PHP_EOL;
+echo "loggingDaemon END".PHP_EOL;
 exit();
-?>
 
