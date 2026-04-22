@@ -16,7 +16,7 @@ function doPack($version) {
 
 function doDeploy($version) {
 	$success = true;
-	exec("bin/bash /opt/it490/deployment/deploy.sh $version", $output, $code);
+	exec("/bin/bash /opt/it490/deployment/deploy.sh $version", $output, $code);
 	foreach ($output as $line) {
 		echo "$line \n";
 	}
