@@ -102,4 +102,5 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"]) && $_POST["se
 	}else{
 		echo "something went wrong";
 	}
+}
 ?>

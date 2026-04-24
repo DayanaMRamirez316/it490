@@ -55,6 +55,11 @@ function transmitPackage(rabbitMQClient $client, mysqli $mydb) {
 }
 
 function transmitDeploy(rabbitMQClient $client, $version) {
+  exec("/bin/bash /opt/it490/deployment/deploy_wrap.sh unwrap $version", $output, $code);
+  foreach ($output as $line) {
+		echo "$line \n";
+	}
+  if ($code != 0) return;
   $request = array();
   $request['type'] = "deploy";
   $request['version'] = "$version";
