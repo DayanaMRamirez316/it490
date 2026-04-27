@@ -75,45 +75,43 @@ function transmitDeploy(rabbitMQClient $client, $version) {
   return $response;
 }
 
-function run($stop) {
-  global $argv, $mydb, $client;
-  $input = readline("Enter a command: (enter -l for list of acceptable commands) ");
-  $command = strtolower(ltrim($input, '-'));
+function run() {
+  $stop = false;
+  while (!$stop) {
+    global $argv, $mydb, $client;
+    $input = readline("Enter a command: (enter -l for list of acceptable commands) ");
+    $command = strtolower(ltrim($input, '-'));
 
-  switch ($command) {
-    case "p": //pack
-      $response = transmitPackage($client, $mydb);
-      break;
-    case "d": //deploy
-      $version = $argv[2];
-      $response = transmitDeploy($client, $version);
-      break;
-    case "l":
-      echo "List of suitable commands:
-            -p  --  pack files from VMs
-            -d  --  deploy specified package to all VMs (includes version number parameter)
-            -l  --  list commands
-            -q  --  quit
-           ";
-      break;
-    case "q";
-      $stop = true;
-      break;
-    default:
-      echo "Enter a valid command please (-l for list of commands)";
-      break;
+    switch ($command) {
+      case "p": //pack
+        $response = transmitPackage($client, $mydb);
+        break;
+      case "d": //deploy
+        $version = $argv[2];
+        $response = transmitDeploy($client, $version);
+        break;
+      case "l":
+        echo "List of suitable commands:
+              -p  --  pack files from VMs
+              -d  --  deploy specified package to all VMs (includes version number parameter)
+              -l  --  list commands
+              -q  --  quit
+             ".PHP_EOL;
+        break;
+      case "q";
+        $stop = true;
+        continue 2;
+      default:
+        echo "Enter a valid command please (-l for list of commands)";
+        break;
+    }
   }
-  echo "client received response: ".PHP_EOL;
-  print_r($response);
-  echo "\n\n";
-
-  echo $argv[0]." END".PHP_EOL;
 }
 
 $mydb = dbConnect();
 $client = new rabbitMQClient("deploy.ini","testServer");
-$stop = false;
-while (!$stop) {
-  run($stop);
-}
-echo "Bye";
+
+run();
+
+echo "Bye".PHP_EOL	;
+?>

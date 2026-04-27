@@ -16,7 +16,7 @@ unwrap() {
 
 case "$command" in
     "wrap")
-        wrap_packages
+        wrap
         ;;
     "unwrap")
         unwrap
