@@ -86,11 +86,11 @@ function run() {
       case "p": //pack
         $response = transmitPackage($client, $mydb);
         break;
-      case "d": //deploy
-        $version = $argv[2];
+      case str_starts_with($command, "d"): //deploy
+        $version = explode(" ", $command)[1];
         $response = transmitDeploy($client, $version);
         break;
-      case "l":
+      case "l": //list
         echo "List of suitable commands:
               -p  --  pack files from VMs
               -d  --  deploy specified package to all VMs (includes version number parameter)
@@ -98,10 +98,10 @@ function run() {
               -q  --  quit
              ".PHP_EOL;
         break;
-      case "q";
+      case "q"; //quit
         $stop = true;
         continue 2;
-      default:
+      default: //catchall
         echo "Enter a valid command please (-l for list of commands)";
         break;
     }
