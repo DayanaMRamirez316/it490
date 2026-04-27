@@ -7,7 +7,7 @@ cleanup_and_exit() {
 }
 
 #path variables
-filename="version_${1}.tar"
+filename="version_${1}_$(cat machineInfo.txt).tar"
 deploydir="/opt/it490/deployment"
 archive="$deploydir/$filename"
 tmpdir=$(mktemp -d)

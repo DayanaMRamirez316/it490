@@ -51,6 +51,14 @@ function transmitPackage(rabbitMQClient $client, mysqli $mydb) {
   $stmt = $mydb->prepare($query);
   $stmt->bind_param('ss', $filename, $newVer);
   $stmt->execute();
+
+  usleep(200000);
+
+  exec("/bin/bash /opt/it490/deployment/deploy_wrap.sh wrap $newVer", $output, $code);
+  foreach ($output as $line) {
+		echo "$line \n";
+	}
+  if ($code != 0) return;
   return $response;
 }
 
@@ -67,21 +75,45 @@ function transmitDeploy(rabbitMQClient $client, $version) {
   return $response;
 }
 
+function run($stop) {
+  global $argv, $mydb, $client;
+  $input = readline("Enter a command: (enter -l for list of acceptable commands) ");
+  $command = strtolower(ltrim($input, '-'));
+
+  switch ($command) {
+    case "p": //pack
+      $response = transmitPackage($client, $mydb);
+      break;
+    case "d": //deploy
+      $version = $argv[2];
+      $response = transmitDeploy($client, $version);
+      break;
+    case "l":
+      echo "List of suitable commands:
+            -p  --  pack files from VMs
+            -d  --  deploy specified package to all VMs (includes version number parameter)
+            -l  --  list commands
+            -q  --  quit
+           ";
+      break;
+    case "q";
+      $stop = true;
+      break;
+    default:
+      echo "Enter a valid command please (-l for list of commands)";
+      break;
+  }
+  echo "client received response: ".PHP_EOL;
+  print_r($response);
+  echo "\n\n";
+
+  echo $argv[0]." END".PHP_EOL;
+}
+
 $mydb = dbConnect();
 $client = new rabbitMQClient("deploy.ini","testServer");
-$command = strtolower($argv[1]);
-
-switch ($command) {
-  case "pack":
-    $response = transmitPackage($client, $mydb);
-    break;
-  case "deploy":
-    $version = $argv[2];
-    $response = transmitDeploy($client, $version);
-    break;
+$stop = false;
+while (!$stop) {
+  run($stop);
 }
-echo "client received response: ".PHP_EOL;
-print_r($response);
-echo "\n\n";
-
-echo $argv[0]." END".PHP_EOL;
+echo "Bye";
