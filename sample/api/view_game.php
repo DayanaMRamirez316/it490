@@ -4,6 +4,8 @@ if (session_status() == PHP_SESSION_NONE) {
 }
 include_once(__DIR__ . '/../app/navBar.php'); 
 require_once('../app/validateSession.php');
+require_once('../../logging/sendLog.php');
+
 if (!isset($_SESSION['token']) || empty($_SESSION['token']))
 {
 	header("Location: /loginPage.php");
@@ -54,6 +56,7 @@ if($_SERVER["REQUEST_METHOD"] == "GET" && $_GET["game_id"] !="" )
 	$response = curl_exec($curl);
 
 	if (curl_errno($curl)) {
+		sendLog("ERROR", "cURL Error: " . curl_error($curl), "view_game.php", "webserver");
     		echo "cURL Error: " . curl_error($curl);
     		curl_close($curl);
     		exit;
@@ -64,7 +67,7 @@ if($_SERVER["REQUEST_METHOD"] == "GET" && $_GET["game_id"] !="" )
 	$game = json_decode($response, true);
 
 	if (!$game) {
-		
+		sendLog("ERROR", "Error decoding the JSON response", "view_game.php", "webserver");
     		die("Error decoding JSON response.");
 	}
 

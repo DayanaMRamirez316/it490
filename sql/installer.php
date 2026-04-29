@@ -3,6 +3,7 @@
 require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
+require_once('../logging/sendLog.php');
 
 function Install($bundleName, $version, $bundlePath){
 	//download bundle from deployment server
@@ -20,16 +21,19 @@ function Install($bundleName, $version, $bundlePath){
 	//download
 	$conn = ftp_connect($server);
 	if(!$conn){
+		sendLog("ERROR", "FTP connection failed", "installer.php", "VM4");
 		return array("returnCode" => 0, "message" => "FTP connection failed");
 	}
 
 	if(!ftp_login($conn, $user, $passWd)){
+		sendLog("ERROR", "FTP login failed", "installer.php", "VM4");
 		return array("returnCode" => 0, "message" => "FTP login failed");
 	}
 
 	ftp_pasv($conn, true);
 
 	if(!ftp_get($conn, "/tmp/update.tar", $bundlePath, FTP_BINARY)){
+		sendLog("ERROR", "FTP download failed", "installer.php", "VM4");
 		return array("returnCode" => 0, "message" => "download failed");
 	}
 
@@ -54,9 +58,12 @@ function requestProcessor($request){
 			$request['bundlePath']
 		);
 	}
+
+	sendLog("ERROR", "Unknown request type: " . $request['type'], "installer.php", "VM4");
 	return array("returnCode" => 0, "message" => "Unknown request type");
 }
 $server = new rabbitMQServer("installer.ini","deployHost");
 $server->process_requests('requestProcessor');
 
 ?>
+

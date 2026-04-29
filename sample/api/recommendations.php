@@ -5,6 +5,7 @@ require_once('../app/get_host_info.inc');
 require_once('../app/rabbitMQLib.inc');
 require_once('../app/phpValidation.php');
 require_once('../app/validateSession.php');
+require_once('../../logging/sendLog.php');
 include_once('../app/navBar.php');
 
 if (!isset($_SESSION['token']) || empty($_SESSION['token']))
@@ -35,6 +36,7 @@ if (empty($response['genres'])){
 	$env = parse_ini_file(__DIR__ . '/.env');
 
 	if (!$env || !isset($env['RAWG_API_KEY'])) {
+		sendLog("ERROR", "API key not found in .env file", "recommendations.php", "webserver");
     		die("API key not found in .env file.");
 	}
 
@@ -66,6 +68,7 @@ if (empty($response['genres'])){
 	$responseCurl = curl_exec($curl);
 
 	if (curl_errno($curl)) {
+		sendLog("ERROR", "cURL Error: " . curl_error($curl), "recommendations.php", "webserver");
     		echo "cURL Error: " . curl_error($curl);
     		curl_close($curl);
     		exit;
@@ -76,7 +79,7 @@ if (empty($response['genres'])){
 	$rawgAPIdata = json_decode($responseCurl, true);
 
 	if (!$rawgAPIdata) {
-		
+		sendLog("ERROR", "Error decoding JSON response", "recommendations.php", "webserver");
     		die("Error decoding JSON response.");
 	}
 
