@@ -14,6 +14,7 @@ tmpdir=$(mktemp -d)
 manifest="manifest.txt"
 manifest_path="deployment/$manifest"
 
+$(."$delploydir"/package.sh rollback)
 #downloads file
 ftp -inv 100.125.53.7 <<EOF 
 user dmr49 Michi100
