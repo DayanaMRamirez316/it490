@@ -75,37 +75,23 @@ function transmitDeploy(rabbitMQClient $client, $version) {
   return $response;
 }
 //store data to database
-function markPass($mydb, $packageID){
+function markPass($mydb, $version){
 	//update deployment_packages
-	$query = "UPDATE deployment_packages SET status = 'passed' WHERE packageID = ?";
+	$query = "UPDATE deployment_packages SET status = 'passed' WHERE version = ?";
 	$stmt = $mydb->prepare($query);
-	$stmt->bind_param('i', $packageID);
+	$stmt->bind_param('s', $version);
 	$stmt->execute();
-
-	//store deployment_history
-	$query =  "INSERT INTO deployment_history (package_id, status, comments) SELECT packageID, 'passed', '?' FROM deployment_packages";
-	$stmt->$mydb->prepare($query);
-	$stmt->bind_prepare('i', $packageID);
-	$stmt->execute();
-
 }
 
 //trigger rollback if marked as failed
-function markFail($mydb, $packageID, $comment){
+function markFail($mydb, $version){
 	//update deployment_packages
-	$query = "UPDATE deployment_packages SET status = 'failed' WHERE packageID = ?";
+	$query = "UPDATE deployment_packages SET status = 'failed' WHERE version = ?";
 	$stmt = $mydb->prepare($query);
-	$stmt->bind_param('i', $packageID);
-	$stmt->execute();
-
-	//update deployment_history
-	$query = "INSERT INTO deployment_history (package_id, status, comments) VALUES (?, 'failed', '?')";
-	$stmt = $mydb->prepare($query);
-	$stmt->bind_param('is', $packageID, $comment);
+	$stmt->bind_param('s', $version);
 	$stmt->execute();
 
 	//call rollback 	
-	
 }
 
 function run() {
@@ -123,10 +109,25 @@ function run() {
         $version = explode(" ", $command)[1];
         $response = transmitDeploy($client, $version);
         break;
+      case str_starts_with($command, "m"): //mark
+        $params = explode(" ", $command);
+        if (count($params) != 3) {
+          echo "Need 2 parameters: [p/f] [version]";
+          break;
+        }
+        $status = $params[1];
+        $version = $params[2];
+        if ($status == "f") markFail($mydb, $version);
+        else if ($status == "p") markPass($mydb, $version);
+        else echo "
+          incorrect syntax
+          -m  --  mark [p/f] [version]: marks specified packaged either pass or fail, rollbacks if fail";
+        break;
       case "l": //list
         echo "List of suitable commands:
               -p  --  pack files from VMs
-              -d  --  deploy specified package to all VMs (includes version number parameter)
+              -d  --  deploy [version] [env]: deploys specified version package to environment
+              -m  --  mark [status] [version]: marks specified packaged either pass or fail, rollbacks if fail
               -l  --  list commands
               -q  --  quit
              ".PHP_EOL;
