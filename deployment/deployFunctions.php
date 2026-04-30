@@ -7,10 +7,14 @@ require_once('rabbitMQLib.inc');
  * Handles all deployment server main functions
  * 
  * Packaging, deploying, and rollback are all handled in this document, by calling different functions.
- * All functions use RMQ to transmit commands to the various clusters
+ * All functions use RMQ to send commands to the various clusters
  * 
  */
-
+function bashReport($output) {
+  foreach ($output as $line) {
+		echo "$line \n";
+	}
+}
 // Called upon for connection to mySQL database
 function dbConnect() {
   $mydb = new mysqli('127.0.0.1','deployer','deployPwd!','deployDB');
@@ -31,9 +35,9 @@ function dbConnect() {
  * creates new version number for package, and inserts new fields in DB
  * @param rabbitMQClient $client The RMQ client, with it's various functions
  * @param mysqli $mydb The database client, with it's various functions
- * @return string[] Returns an array of strings, formatted in JSON
+ * @return string[] | void Returns an array of strings, formatted in JSON
  */
-function transmitPackage(rabbitMQClient $client, mysqli $mydb) {
+function sendPackage(rabbitMQClient $client, mysqli $mydb) {
   $query = "SELECT ROUND(MAX(version) + 0.01, 2) AS newVer FROM deployment_packages";
   $stmt = $mydb->prepare($query);
   $stmt->execute();
@@ -55,19 +59,18 @@ function transmitPackage(rabbitMQClient $client, mysqli $mydb) {
   usleep(200000);
 
   exec("/bin/bash /opt/it490/deployment/deploy_wrap.sh wrap $newVer", $output, $code);
-  foreach ($output as $line) {
-		echo "$line \n";
-	}
+  bashReport($output);
   if ($code != 0) return;
   return $response;
 }
 
-function transmitDeploy(rabbitMQClient $client, $version) {
-  exec("/bin/bash /opt/it490/deployment/deploy_wrap.sh unwrap $version", $output, $code);
-  foreach ($output as $line) {
-		echo "$line \n";
-	}
-  if ($code != 0) return;
+function sendDeploy(rabbitMQClient $client, $version) {
+  
+  if ($version != "rollback") {
+    exec("/bin/bash /opt/it490/deployment/deploy_wrap.sh unwrap $version", $output, $code);
+    bashReport($output);
+    if ($code != 0) return;
+  }
   $request = array();
   $request['type'] = "deploy";
   $request['version'] = "$version";
@@ -84,14 +87,14 @@ function markPass($mydb, $version){
 }
 
 //trigger rollback if marked as failed
-function markFail($mydb, $version){
+function markFail($mydb, $client, $version){
 	//update deployment_packages
 	$query = "UPDATE deployment_packages SET status = 'failed' WHERE version = ?";
 	$stmt = $mydb->prepare($query);
 	$stmt->bind_param('s', $version);
 	$stmt->execute();
 
-	//call rollback 	
+	sendDeploy($client, "rollback");
 }
 
 function run() {
@@ -103,11 +106,11 @@ function run() {
 
     switch ($command) {
       case "p": //pack
-        $response = transmitPackage($client, $mydb);
+        $response = sendPackage($client, $mydb);
         break;
       case str_starts_with($command, "d"): //deploy
         $version = explode(" ", $command)[1];
-        $response = transmitDeploy($client, $version);
+        $response = sendDeploy($client, $version);
         break;
       case str_starts_with($command, "m"): //mark
         $params = explode(" ", $command);
@@ -117,7 +120,7 @@ function run() {
         }
         $status = $params[1];
         $version = $params[2];
-        if ($status == "f") markFail($mydb, $version);
+        if ($status == "f") markFail($mydb, $client, $version);
         else if ($status == "p") markPass($mydb, $version);
         else echo "
           incorrect syntax

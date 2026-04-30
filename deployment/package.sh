@@ -25,7 +25,7 @@ if [ "${1}" = "rollback" ]; then
     filename="rollback.tar"
     do_transfer=false
 else
-    filename="version_${1}.tar"
+    filename="version_${1}_$(cat machineInfo.txt).tar"
     do_transfer=true
 fi
 

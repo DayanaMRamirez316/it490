@@ -4,12 +4,16 @@ require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 
+function bashReport($output) {
+  foreach ($output as $line) {
+		echo "$line \n";
+	}
+}
+
 function doPack($version) {
 	$success = true;
 	exec("/bin/bash /opt/it490/deployment/package.sh $version", $output, $code);
-	foreach($output as $line) {
-		echo "$line \n";
-	}
+	bashReport($output);
 	if ($code != 0) $success = false;
 	return $success;
 }
@@ -17,9 +21,7 @@ function doPack($version) {
 function doDeploy($version) {
 	$success = true;
 	exec("/bin/bash /opt/it490/deployment/deploy.sh $version", $output, $code);
-	foreach ($output as $line) {
-		echo "$line \n";
-	}
+	bashReport($output);
 	if ($code != 0) $success = false;
 	return $success;
 }

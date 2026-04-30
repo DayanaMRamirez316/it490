@@ -9,7 +9,7 @@ wrap() {
 }
 
 unwrap() {
-    tar -xf "${path}${archive_prefix}.tar"
+    tar -xf "${path}${archive_prefix}.tar" -C "$path"
 }
 
 

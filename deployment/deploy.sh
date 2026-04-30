@@ -7,16 +7,23 @@ cleanup_and_exit() {
 }
 
 #path variables
-filename="version_${1}_$(cat machineInfo.txt).tar"
 deploydir="/opt/it490/deployment"
-archive="$deploydir/$filename"
 tmpdir=$(mktemp -d)
 manifest="manifest.txt"
 manifest_path="deployment/$manifest"
 
-$(."$delploydir"/package.sh rollback)
-#downloads file
-ftp -inv 100.125.53.7 <<EOF 
+if [[ "$1" == "rollback" ]]; then
+    filename="rollback.tar"
+    archive="$deploydir/$filename"
+else
+    filename="version_${1}_$(cat machineInfo.txt).tar"
+    archive="$deploydir/$filename"
+    "$deploydir/package.sh" rollback || {
+        echo "Failed to create rollback package"
+        cleanup_and_exit
+    }
+    #downloads archive
+    ftp -inv 100.125.53.7 <<EOF 
 user dmr49 Michi100
 binary
 cd deployment
@@ -24,10 +31,11 @@ lcd $deploydir
 get $filename "$archive"
 bye
 EOF
+fi
 
 #checks for download, exits if failed
 [ -f "$archive" ] || {
-    echo "FTP failed: $archive not found"
+    echo "Archive not found: $archive"
     cleanup_and_exit
 }
 
@@ -44,9 +52,13 @@ while IFS='|' read -r archived_file final_path; do
 
     mkdir -p "$(dirname "$final_path")" || cleanup_and_exit
     cp -f "$tmpdir/$archived_file" "$final_path" || cleanup_and_exit
+
     echo "$archived_file : $final_path"
-done < "$manifest_path"
+done < "$tmpdir/$manifest_path"
 
 rm -rf "$tmpdir"
-rm -f "$archive"
+
+if [[ "$1" != "rollback" ]]; then
+    rm -f "$archive"
+fi
 echo "all done"
