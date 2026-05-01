@@ -9,12 +9,12 @@ wrap() {
 
     packages=( "${archive_prefix}"_*.tar )
 
-    if [[ ! -e "${files}"]]; then
+    if [[ ! -e "${packages[0]}" ]]; then
         echo "No packages found matching ${archive_prefix}_*.tar"
         exit 1
     fi
 
-    tar -cvf "${archive_prefix}.tar" "${archive_prefix}_*.tar"
+    tar -cvf "${archive_prefix}.tar" "${files[@]}"
 }
 
 unwrap() {
