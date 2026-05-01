@@ -64,17 +64,17 @@ function sendPackage(rabbitMQClient $client, mysqli $mydb) {
   return $response;
 }
 
-function sendDeploy(rabbitMQClient $client, $version) {
+function sendDeploy(rabbitMQClient $client, $version, $env) {
   
   if ($version != "rollback") {
     exec("/bin/bash /opt/it490/deployment/deploy_wrap.sh unwrap $version", $output, $code);
     bashReport($output);
     if ($code != 0) return;
-  }
+  } else echo 'rollback: skipping unwrap';
   $request = array();
   $request['type'] = "deploy";
   $request['version'] = "$version";
-  $response = $client->publish_to_exchange($request, "dev");
+  $response = $client->publish_to_exchange($request, $env);
   return $response;
 }
 //store data to database
@@ -94,7 +94,7 @@ function markFail($mydb, $client, $version){
 	$stmt->bind_param('s', $version);
 	$stmt->execute();
 
-	sendDeploy($client, "rollback");
+	sendDeploy($client, "rollback", "dev"); //change env to "qa" later
 }
 
 function run() {
@@ -109,8 +109,14 @@ function run() {
         $response = sendPackage($client, $mydb);
         break;
       case str_starts_with($command, "d"): //deploy
-        $version = explode(" ", $command)[1];
-        $response = sendDeploy($client, $version);
+        $params = explode(" ", $command);
+        if (count($params) != 3) {
+          echo "Need 2 parameters: [version] [environment]";
+          break;
+        }
+        $version = $params[1];
+        $env = $params[2];
+        $response = sendDeploy($client, $version, $env);
         break;
       case str_starts_with($command, "m"): //mark
         $params = explode(" ", $command);
