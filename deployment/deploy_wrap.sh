@@ -6,15 +6,15 @@ archive_prefix="version_${2}"
 
 wrap() {
     cd "$path" || exit 1
-    ls -l
-    packages=( "${archive_prefix}"_*.tar )
 
+    packages=( "${archive_prefix}"_*.tar )
+    
     if [[ ! -e "${packages[0]}" ]]; then
         echo "No packages found matching ${archive_prefix}_*.tar"
         exit 1
     fi
 
-    tar -cvf "${archive_prefix}.tar" "${files[@]}"
+    tar -cvf "${archive_prefix}.tar" "${packages[@]}"
 }
 
 unwrap() {
