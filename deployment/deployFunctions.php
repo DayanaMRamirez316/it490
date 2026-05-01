@@ -51,7 +51,7 @@ function sendPackage(rabbitMQClient $client, mysqli $mydb) {
   $request['version'] = "$newVer";
   $response = $client->publish_to_exchange($request, "dev");
 
-  $query = "INSERT INTO deployment_packages (packageName, version, status, created_by) VALUES (?, ?, \"untested\", \"mgb46\")";
+  $query = "INSERT INTO deployment_packages (packageName, version) VALUES (?, ?)";
   $stmt = $mydb->prepare($query);
   $stmt->bind_param('ss', $filename, $newVer);
   $stmt->execute();

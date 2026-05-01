@@ -25,7 +25,7 @@ if [ "${1}" = "rollback" ]; then
     filename="rollback.tar"
     do_transfer=false
 else
-    filename="version_${1}_$(cat machineInfo.txt).tar"
+    filename="version_${1}_$(cat deployment/machineInfo.txt).tar"
     do_transfer=true
 fi
 
@@ -47,5 +47,5 @@ if [[ "$1" != "rollback" ]]; then
 else
     rm -f deployment/newVer.txt
 fi
-
+rm -f deployment/manifest.txt
 rm -f deployment/deploy.txt
