@@ -5,7 +5,7 @@ path="/home/dmr49/deployment/"
 archive_prefix="version_${2}"
 
 wrap() {
-    tar -cvf "${path}${archive_prefix}.tar" $archive_prefix*
+    tar -cvf "${path}${archive_prefix}.tar" "$archive_prefix*"
 }
 
 unwrap() {

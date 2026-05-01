@@ -24,7 +24,7 @@ else
     }
     #downloads archive
     ftp -inv 100.125.53.7 <<EOF 
-user dmr49 Michi100
+user dmr49 IT490Kehoe
 binary
 cd deployment
 lcd $deploydir

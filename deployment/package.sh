@@ -33,7 +33,7 @@ tar -cvf deployment/"$filename" -T deployment/deploy.txt deployment/manifest.txt
 
 if [[ "$do_transfer" = true ]]; then
     ftp -inv 100.125.53.7 <<EOF 
-    user dmr49 Michi100
+    user dmr49 IT490Kehoe
     binary
     cd deployment
     lcd /opt/it490/deployment
