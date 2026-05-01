@@ -13,6 +13,7 @@ require_once('rabbitMQLib.inc');
 
 $mydb = new mysqli('127.0.0.1','userInfo','theBestPassword','data');
 
+
 if ($mydb->errno != 0)
 {
 	echo "failed to connect to database: ". $mydb->error . PHP_EOL;
@@ -34,7 +35,7 @@ function doLogin($email,$password)
         return array("returnCode" => "2", "message" => "Failed to prepare statement");
     }
 
-    $stmt->bind_param('s', $email);  
+    $stmt->bind_param('s', $email);
 
     if (!$stmt->execute())
 {
@@ -493,19 +494,17 @@ function getRecommendations($user_id)
 //that have an average rating of 75 or higher. If there are no genres with an average rating of 75 or higher, 
 //it returns the top 3 genres with the highest average rating.
 {
-	error_log("=== get recomendations : ". $user_id . " ===");
-	global $mydb;
-	error_log("Query database for user genres");
 
+	 global $mydb;
          $query = "SELECT Games.genre, AVG(User_Reviews.rating) FROM User_Reviews JOIN Games ON User_Reviews.game_id = Games.game_id WHERE User_Reviews.user_id = ? GROUP BY Games.genre HAVING AVG(User_Reviews.rating) > 75";
          $stmt = $mydb->prepare($query);
          $stmt->bind_param('i', $user_id);
 
-	 if (!$stmt->execute()){
-		error_log("DB failed: " . $mydb->error);
-		//echo "failed to execute query:".PHP_EOL;
-            	//echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
-            	return array("returnCode" => 2, "message" => "db error");
+         if (!$stmt->execute())
+{
+            echo "failed to execute query:".PHP_EOL;
+            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+            return array("returnCode" => 2, "message" => "db error");
 	 }
 
 	 $response = $stmt->get_result();
@@ -517,78 +516,32 @@ function getRecommendations($user_id)
 	 }
 
 	 $stmt->close();
-	 error_log("Found" . count($genres) . "genres from DB");
-	 
+
 	 if(count($genres) == 0){
-		 error_log("genres calculating getting top 3");
 
         	$query = "SELECT Games.genre, AVG(User_Reviews.rating) AS avg_rating FROM User_Reviews JOIN Games ON User_Reviews.game_id = Games.game_id WHERE User_Reviews.user_id = ? GROUP BY Games.genre ORDER BY avg_rating DESC LIMIT 3";
 
         $stmt = $mydb->prepare($query);
         $stmt->bind_param('i', $user_id);
 
-	if (!$stmt->execute()){
-		error_log("Second DB failed: " . $mydb->error);
-            //echo "failed to execute query:".PHP_EOL;
-            //echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+        if (!$stmt->execute()){
+            echo "failed to execute query:".PHP_EOL;
+            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
             return array("returnCode" => 2, "message" => "db error /session not valid");
         }
 
         $response = $stmt->get_result();
 
         while($row = $response->fetch_assoc()){
-		$genres[] = $row['genre'];
-	}
-	$stmt->close();
-	error_log("FOUND " . count($genres) . " genres from top 3");
-	}	
-
-	 //No genres return empty array
-	 if(count($genres) == 0){
-		 error_log("No genres found at all for user" );
-		 return array("returnCode" => 1, "genres" => array(), "games" => array());
-	 }
-
-	 $genreSlugs = [];
-	 foreach($genres as $genre){
-		 $genreSlugs[] = strtolower(str_replace(' ','-', trim($genre)));
-	 }
-
-	 $genreParam = implode(',', $genreSlugs);
-	 error_log("Genre param for DMZ: " . $genreParam);
-	 error_log("Calling DMZ server");
+            $genres[] = $row['genre'];
+        }
+    }
 	 
-	$client = new rabbitMQClient("dmz.ini", "testServer");
-        $dmzRequest = array( 'type' => 'recomendGenre', 'genre' => $genreParam );
-	$dmzResponse = $client->send_request($dmzRequest);
+	 
+	 return array("returnCode" => 1, "genres" => $genres);
+	 
 
-	//error_log("DMZ response recived. Return code: " . print_r($dmzResponse, true));
 
-	if($dmzResponse['returnCode'] == 1 && isset($dmzResponse['genre'])){
-		error_log("DMZ recived " . count($dmzResponse['genre']) . " games");
-		$returnData = array(
-			"returnCode" => 1,
-			"genres" => $genres,
-			"games" => $dmzResponse['genre']
-		);
-		//error_log("=== returning data to client ===" );
-		//error_log("Return data keys: " . implode(', ', array_keys($returnData)));
-		//error_log("Number of games: " . count($returnData['games']));
-
-		return $returnData;
-	}else{
-		$returnData = array(
-			"returnCode" => 0,
-			"genres" => array(),
-			"message" => "somethng whent wrong"
-		);
-		return $returnData;
-	}
-       //var_dump($response);
-        //echo "retirived";
-        //return array("returnCode" => 1, "genre" => $response['genre']);
-
-	 //return array("returnCode" => 1, "genres" => $genres);
 }
 
 function getProfileALL($user_id, $follow_id, $viewer_id)
@@ -629,7 +582,7 @@ function getProfileALL($user_id, $follow_id, $viewer_id)
 	 $row = $response->fetch_assoc();
 	 if(empty($row)){
 		 echo "EMPTY";
-	 	return array("returnCode" => 0);
+	 	return array("returnCode" => "0");
 	 }
 	 $email = $row['email'];
 	 $stmt->close();
@@ -648,67 +601,27 @@ function getProfileALL($user_id, $follow_id, $viewer_id)
          if ($response && $response->num_rows > 0) {
 
                 $row = $response->fetch_assoc();
-                return array("returnCode" => 1, "followCode" => 1, "email" => $email, "array" => $all_rows);
+                return array("returnCode" => "1", "followCode" => "1", "email" => $email, "array" => $all_rows);
          }
 
-         return array("returnCode" => 1, "followCode" => 0, "email" => $email, "array" => $all_rows);
+         return array("returnCode" => "1", "followCode" => "0", "email" => $email, "array" => $all_rows);
 
 }
-//gets a list of games based on user input ex: sonic - sonic the hedgehog 1992, sonic cd , .....,etc
+
 function getGameList($search){
 	//send request to dmz
-	$client = new rabbitMQClient("dmz.ini", "testServer");
-	$request = array( 'type' => 'listGames', 'search' => $search );
+	$client = new rabbitMQClient("dmz.ini","testServer");
+	$request = array();
+	$request['type'] = 'listGames';
+	$request['search'] = $search;
 	$response = $client->send_request($request);
-		
-	if($response['returnCode'] == 0){
-		return array("returnCode" => 0, "search" => $search , "message" => "request not found");
-	}else if($response['returnCode'] == 1){
-		return array("returnCode" => 1, "games" => $response['games']);
+	if($response['returnCode'] == 1){
+		//return data
+		return $response['games'];
+	}else{
+		//return empty for now
+		return array();
 	}
-}
-
-//when user wants more information about a game ...
-function getGameDetails($gameId){
-	$client = new rabbitMQClient("dmz.ini", "testServer");
-        $request = array( 'type' => 'details', 'gameId' => $gameId );
-        $response = $client->send_request($request);
-        
-        if($response['returnCode'] == 0){
-                return array("returnCode" => 0 , "message" => "request not found");
-        }
-        return array("returnCode" => 1, "game" => $response['game']);
-
-}
-
-//recomendations for recomentions.php file
-function getGenre($genre){
-	$client = new rabbitMQClient("dmz.ini", "testServer");
-        $request = array( 'type' => 'recomendGenre', 'genre' => $genre );
-        $response = $client->send_request($request);
-        
-        if($response['returnCode'] == 0){
-                return array("returnCode" => 0, "message" => "request not found");
-	}
-//	var_dump($response);
-	echo "retirived";
-	return array("returnCode" => 1, "genre" => $response['genre']);
-	
-}
-
-function handleMetadataDeploy($request)
-{
-	echo "Deployment metadata is recieved\n";
-	print_r($request);
-	$installerPath = __DIR__ . "/../systemd/installer.sh";
-	$output = shell_exec("bash " . escapeshellarg($installerPath) . " 2>&1");
-	echo "Installer output:\n";
-	echo $output;
-	return[
-		"returnCode" => "0",
-		"message" => "Recieved Deployment Metadata",
-		"file_location" => $request["file_location"] ?? "",
-		"version" => $request["version"] ?? ""];
 }
 
 function requestProcessor($request)
@@ -752,12 +665,8 @@ function requestProcessor($request)
              return getProfileAll($request['user_id'], $request['follow_id'], $request['viewer_id']);
      case "listGames":
 	     return getGameList($request['search']);
-     case "gameDetails":
-	     return getGameDetails($request['gameId']);
-     case "genres":
-	     return getGenre($request['genre']);
-     case "deployment_metadata":
-	     return handleMetadataDeploy($request); 
+
+
 
   }
   return array("returnCode" => '0', 'message'=>"Server received request and processed");
