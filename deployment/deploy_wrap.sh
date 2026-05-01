@@ -6,7 +6,7 @@ archive_prefix="version_${2}"
 
 wrap() {
     cd "$path" || exit 1
-
+    ls -l
     packages=( "${archive_prefix}"_*.tar )
 
     if [[ ! -e "${packages[0]}" ]]; then

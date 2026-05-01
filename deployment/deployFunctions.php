@@ -56,7 +56,7 @@ function sendPackage(rabbitMQClient $client, mysqli $mydb) {
   $stmt->bind_param('ss', $filename, $newVer);
   $stmt->execute();
 
-  usleep(200000);
+  sleep(5);
 
   exec("/bin/bash /opt/it490/deployment/deploy_wrap.sh wrap $newVer", $output, $code);
   bashReport($output);
