@@ -16,7 +16,7 @@ if [[ "$1" == "rollback" ]]; then
     filename="rollback.tar"
     archive="$deploydir/$filename"
 else
-    filename="version_${1}_$(cat machineInfo.txt).tar"
+    filename="version_${1}_$(cat deployment/machineInfo.txt).tar"
     archive="$deploydir/$filename"
     "$deploydir/package.sh" rollback || {
         echo "Failed to create rollback package"

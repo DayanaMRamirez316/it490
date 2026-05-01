@@ -14,12 +14,12 @@ wrap() {
         exit 1
     fi
 
-    tar -cvf "${archive_prefix}.tar" "${packages[@]}"
+    tar -cvf "${archive_prefix}.tar" "${packages[@]}" --remove-files
 }
 
 unwrap() {
     cd "$path" || exit 1
-    tar -xf "${path}${archive_prefix}.tar" -C "$path"
+    tar -xf "${archive_prefix}.tar" -C "$path"
 }
 
 
