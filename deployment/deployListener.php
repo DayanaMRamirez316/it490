@@ -25,7 +25,7 @@ function doDeploy($version) {
 }
 
 //Function requests information from the Processor, if the message is typed incorrectly,
-// then the 
+// then it will reject and send an error message regarding the typos the user put.
 
 function requestProcessor($request) {
   echo "received request".PHP_EOL;
@@ -66,6 +66,8 @@ function requestProcessor($request) {
   }
 }
 $server = new rabbitMQServer("deploy.ini","testServer");
+
+//Sets up a new rabbitMQServeer
 
 echo "testRabbitMQServer BEGIN".PHP_EOL;
 $server->process_requests('requestProcessor');
