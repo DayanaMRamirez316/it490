@@ -3,6 +3,9 @@
 require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
+// Handles all the the deployment listener requests.
+// Deployment is handled in this file. Built based on the deployFunctions.php file, this file
+// executes deployment based on version control and bash scripts.
 
 function doPack($version) {
 	$success = true;
