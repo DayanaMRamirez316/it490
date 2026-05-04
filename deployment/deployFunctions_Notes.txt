@@ -1,0 +1,31 @@
+What deployFunctions.php does: 
+
+It is ran on deployment VM where it will control the packages,
+deploy, and mark pass/fail commands. 
+
+deployFunctions.php consists of: 
+- sendPackage(): this sends a package request , inserts the versions into DB, and wraps the package
+- sendDeploy(): this sends deploy request to environment selected 
+- markPass() : marks the deployment as passed 
+- markFails(): marks the deployment as failed and then it will trigger rollbacks
+- run(); command lop 
+
+The commands are: 
+- p : package
+- d <insert version> <insert environment> : deploy
+- m <either pass or fail> <version> : mark pass/fail 
+- l : list commands
+- q : quit 
+
+The dependencies are: 
+- RMQ
+- deploy.ini 
+- deployment database 
+- deploy_wrap.sh 
+- package.sh 
+- correct routing key 
+
+Notes for testing: 
+- make sure VM listener is running 
+- deploy.ini exists 
+- machineInfo.txt is correct
