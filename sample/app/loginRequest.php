@@ -37,6 +37,8 @@ $response = $client->send_request($request);
 if (isset($response['returnCode']) && (int)$response['returnCode'] === 1){
 	if (isset($response["token"])) {
 		$_SESSION['token'] = $response["token"];
+		$_SESSION['user_id'] = $response["user_id"];
+		$_SESSION['email'] = $response['email'];
 	}
 	header ("Location: /index.php");
 	exit();

@@ -1,5 +1,7 @@
 <?php 
-session_start();
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 require_once(__DIR__ . '/app/validateSession.php');
 if (!isset($_SESSION['token']) || empty($_SESSION['token']))
 {
@@ -37,9 +39,8 @@ if (!toValidateSessionTokens($_SESSION['token']))
         </style>
         </head>
         <body>
+            <?php include_once(__DIR__ . '/app/navBar.php'); ?>
             <h1> Welcome </h1>
-	    <form action="/app/logout.php" method = "POST">
-		<button type ="submit"> Log Out</button>
 	</form>
 </body>
     </head>

@@ -1,0 +1,1 @@
+<< INSERT MACHINE TYPE FROM LIST: ( FE | BE | DMZ ) >>

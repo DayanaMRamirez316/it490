@@ -1,7 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
@@ -23,13 +20,13 @@ $request ['email'] = $_POST['email'];
 $request ['password'] = $_POST['password'];
 $response = $client->send_request($request);
 
-
 if(isset($response['returnCode']) && $response['returnCode'] == "1"){
 	//aproved
-	header("Location: ../loginPage.php");
+	header("Location: /loginPage.php");
 	exit();
 }else{
 	//denided
-	header("Location: ../registration.html");
+	header("Location: /registration.html");
+	exit();
 	
 }

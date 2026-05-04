@@ -20,22 +20,15 @@ else
   $msg = "test message";
 }
 
-/**
-$request = array();
-$request['type'] = "Login";
-$request['username'] = "steve";
-$request['password'] = "password";
-$request['message'] = $msg;
-$response = $client->send_request($request);
-//$response = $client->publish($request);
-*/
 $request = array();
 $request['type'] = "Login";
 $request['email'] = $_POST['email'];
 $request['password'] = $_POST['password'];
 $response = $client->send_request($request);
 
-if ($response['returnCode'] == 0) 
+if ($response['returnCode'] == 0)
+//when login is sucessful, session variables are set and user is brought to index page. 
+//If unsucessful, user is brought back to login page with an error message. 
   {
     session_start();
     $_SESSION['user'] = $request['email'];
