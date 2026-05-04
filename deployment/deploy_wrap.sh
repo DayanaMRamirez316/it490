@@ -5,11 +5,21 @@ path="/home/dmr49/deployment/"
 archive_prefix="version_${2}"
 
 wrap() {
-    tar -cvf "${path}${archive_prefix}.tar" $archive_prefix*
+    cd "$path" || exit 1
+
+    packages=( "${archive_prefix}"_*.tar )
+    
+    if [[ ! -e "${packages[0]}" ]]; then
+        echo "No packages found matching ${archive_prefix}_*.tar"
+        exit 1
+    fi
+
+    tar -cvf "${archive_prefix}.tar" "${packages[@]}" --remove-files
 }
 
 unwrap() {
-    tar -xf "${path}${archive_prefix}.tar"
+    cd "$path" || exit 1
+    tar -xf "${archive_prefix}.tar" -C "$path"
 }
 
 

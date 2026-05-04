@@ -25,7 +25,7 @@ if [ "${1}" = "rollback" ]; then
     filename="rollback.tar"
     do_transfer=false
 else
-    filename="version_${1}.tar"
+    filename="version_${1}_$(cat deployment/machineInfo.txt).tar"
     do_transfer=true
 fi
 
@@ -33,7 +33,7 @@ tar -cvf deployment/"$filename" -T deployment/deploy.txt deployment/manifest.txt
 
 if [[ "$do_transfer" = true ]]; then
     ftp -inv 100.125.53.7 <<EOF 
-    user dmr49 Michi100
+    user dmr49 IT490Kehoe
     binary
     cd deployment
     lcd /opt/it490/deployment
@@ -47,5 +47,5 @@ if [[ "$1" != "rollback" ]]; then
 else
     rm -f deployment/newVer.txt
 fi
-
+rm -f deployment/manifest.txt
 rm -f deployment/deploy.txt

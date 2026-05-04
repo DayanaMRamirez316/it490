@@ -1,0 +1,13 @@
+[Unit]
+Description= dmz listener
+After=network.target mysql.service rabbitmq-server.service
+
+[Service]
+WorkingDirectory=/opt/it490/
+ExecStart=/usr/local/bin/dmz.sh
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+

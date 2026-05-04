@@ -3,20 +3,11 @@
 require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
-/**
- * Handles the listening side for the deployment server. 
- * This document handles packing, deploying, and sends a request to the processor.
- * The goal of the scripting to properly deploy the bash scripting with a stick of cases and breaks in between.
- * THe cases and breaks in between are meant to call in the functions executing the bash scripts.
- */
 
-//
 function doPack($version) {
 	$success = true;
 	exec("/bin/bash /opt/it490/deployment/package.sh $version", $output, $code);
-	foreach($output as $line) {
-		echo "$line \n";
-	}
+	bashReport($output);
 	if ($code != 0) $success = false;
 	return $success;
 }
@@ -24,9 +15,7 @@ function doPack($version) {
 function doDeploy($version) {
 	$success = true;
 	exec("/bin/bash /opt/it490/deployment/deploy.sh $version", $output, $code);
-	foreach ($output as $line) {
-		echo "$line \n";
-	}
+	bashReport($output);
 	if ($code != 0) $success = false;
 	return $success;
 }

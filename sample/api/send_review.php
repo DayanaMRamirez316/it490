@@ -17,9 +17,6 @@ if(!isset($_POST['name'])){
 	exit();
 }
 
-
-
-
 $game_name = trim($_POST['name']);
 $genre = trim($_POST['genre']);
 $release = trim($_POST['released']);
@@ -39,8 +36,6 @@ if (strlen($reviewText) > 500){
         header ("Location: /api/listGames.php");
         exit();
 }
-
-
 
 $client = new rabbitMQClient("testRabbitMQ.ini","testServer");
 
