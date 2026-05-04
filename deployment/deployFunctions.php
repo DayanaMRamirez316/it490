@@ -35,7 +35,7 @@ function dbConnect() {
  * creates new version number for package, and inserts new fields in DB
  * @param rabbitMQClient $client The RMQ client, with it's various functions
  * @param mysqli $mydb The database client, with it's various functions
- * @return string[] | void Returns an array of strings, formatted in JSON
+ * @return void
  */
 function sendPackage(rabbitMQClient $client, mysqli $mydb) {
   $query = "SELECT ROUND(MAX(version) + 0.01, 2) AS newVer FROM deployment_packages";
@@ -61,9 +61,17 @@ function sendPackage(rabbitMQClient $client, mysqli $mydb) {
   exec("/bin/bash /opt/it490/deployment/deploy_wrap.sh wrap $newVer", $output, $code);
   bashReport($output);
   if ($code != 0) return;
-  return $response;
 }
-
+/**
+ * Handles deployment to cluster of VMs
+ * 
+ * Sends a JSON of type "deploy" through RMQ to all listening specified environment VMs,
+ * sends version archive and extracts. Also creates rollback
+ * @param rabbitMQClient $client The RMQ client, with it's various functions
+ * @param string $version The version to deploy
+ * @param string $env The enviorment cluster where to deploy package to
+ * @return void
+ */
 function sendDeploy(rabbitMQClient $client, $version, $env) {
   
   if ($version != "rollback") {
@@ -94,7 +102,7 @@ function markFail($mydb, $client, $version){
 	$stmt->bind_param('s', $version);
 	$stmt->execute();
 
-	sendDeploy($client, "rollback", "dev"); //change env to "qa" later
+	sendDeploy($client, "rollback", "qa");
 }
 
 function run() {
