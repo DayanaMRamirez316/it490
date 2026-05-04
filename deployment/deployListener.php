@@ -24,6 +24,9 @@ function doDeploy($version) {
 	return $success;
 }
 
+//Function requests information from the Processor, if the message is typed incorrectly,
+// then the 
+
 function requestProcessor($request) {
   echo "received request".PHP_EOL;
   var_dump($request);
