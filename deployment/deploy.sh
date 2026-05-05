@@ -1,64 +1,53 @@
 #!/bin/bash
 
-#cleanup tempDir and exit out of code
-cleanup_and_exit() {
-    rm -rf "$tmpdir"
-    exit 1
+cd "$(dirname "$0")/.."
+
+find . \( -path "./.git" -o -path "./deployment" \) -prune -o -type f -exec sha256sum --text "{}" \; | sort > ./deployment/newVer.txt
+
+join -j 2 \
+    <(awk '{ path=substr($0, index($0,$2)); sub(/^\*/, "", path); print $1, path }' deployment/baseVer.txt | sort -k2,2) \
+    <(awk '{ path=substr($0, index($0,$2)); sub(/^\*/, "", path); print $1, path }' deployment/newVer.txt | sort -k2,2) \
+| awk '$2 != $3 {print $1}' > deployment/deploy.txt
+
+comm -13 \
+    <(awk '{ path=substr($0, index($0,$2)); sub(/^\*/, "", path); print path }' deployment/baseVer.txt | sort) \
+    <(awk '{ path=substr($0, index($0,$2)); sub(/^\*/, "", path); print path }' deployment/newVer.txt | sort) \
+>> deployment/deploy.txt
+
+sort -u deployment/deploy.txt -o deployment/deploy.txt
+
+awk '{ gsub(/^\.\//, "", $0); print "./"$0 "|" "/opt/it490/" $0 }' deployment/deploy.txt > deployment/manifest.txt
+
+tar -cvf deployment/package.tar -T deployment/deploy.txt deployment/manifest.txt
+
+#ftp -inv #insert deploy server ip
+#<<EOF 
+#user your_username your_password
+#binary
+#put deployment/package.tar
+#bye
+#EOF
+
+
+# metadata
+#create metadata.json with location and version and increment version number for
+#the next deployment 
+currentVersion=$(cat deployment/versionNum.txt)
+echo "Creating Metadata"
+
+# metadata stuff
+
+echo "Metadata Construction"
+
+cat > deployment/metadata.json <<EOF
+{
+  "file_location": "/deployment/package.tar",
+  "version": "$1"
 }
-
-#path variables
-deploydir="/opt/it490/deployment"
-tmpdir=$(mktemp -d)
-manifest="manifest.txt"
-manifest_path="deployment/$manifest"
-
-if [[ "$1" == "rollback" ]]; then
-    filename="rollback.tar"
-    archive="$deploydir/$filename"
-else
-    filename="version_${1}_$(cat deployment/machineInfo.txt).tar"
-    archive="$deploydir/$filename"
-    "$deploydir/package.sh" rollback || {
-        echo "Failed to create rollback package"
-        cleanup_and_exit
-    }
-    #downloads archive
-    ftp -inv 100.125.53.7 <<EOF 
-user dmr49 IT490Kehoe
-binary
-cd deployment
-lcd $deploydir
-get $filename "$archive"
-bye
 EOF
-fi
 
-#checks for download, exits if failed
-[ -f "$archive" ] || {
-    echo "Archive not found: $archive"
-    cleanup_and_exit
-}
+echo "metadata.json created with version: $currentVersion"
 
-#extracts manifest from archive, checks if it exists, exits if not
-tar -xf "$archive" -C "$tmpdir" "$manifest_path" || {
-    echo "Failed to extract manifest"
-    cleanup_and_exit
-}
+mv deployment/newVer.txt deployment/baseVer.txt
 
-while IFS='|' read -r archived_file final_path; do
-    [ -z "$archived_file" ] && continue
-
-    tar -xf "$archive" -C "$tmpdir" "$archived_file" || cleanup_and_exit
-
-    mkdir -p "$(dirname "$final_path")" || cleanup_and_exit
-    cp -f "$tmpdir/$archived_file" "$final_path" || cleanup_and_exit
-
-    echo "$archived_file : $final_path"
-done < "$tmpdir/$manifest_path"
-
-rm -rf "$tmpdir"
-
-if [[ "$1" != "rollback" ]]; then
-    rm -f "$archive"
-fi
-echo "all done"
+rm -f deployment/deploy.txt
