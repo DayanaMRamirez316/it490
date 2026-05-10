@@ -11,7 +11,7 @@ require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 
-$mydb = new mysqli('127.0.0.1','userInfo','TheBestPassword123!','data');
+$mydb = new mysqli('127.0.0.1','userInfo','theBestPassword','data');
 
 if ($mydb->errno != 0)
 {
