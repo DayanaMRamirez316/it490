@@ -4,6 +4,8 @@ if (session_status() == PHP_SESSION_NONE) {
 }
 include_once(__DIR__ . '/../app/navBar.php'); 
 require_once('../app/validateSession.php');
+require_once('../../logging/sendLog.php');
+
 if (!isset($_SESSION['token']) || empty($_SESSION['token']))
 {
 	header("Location: /loginPage.php");

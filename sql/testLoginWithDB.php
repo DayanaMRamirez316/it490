@@ -10,6 +10,7 @@ Note: It does say testLoginWithDB, but obviously it just became way more than lo
 require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
+require_once('../logging/sendLog.php');
 
 $mydb = new mysqli('127.0.0.1','userInfo','theBestPassword','data');
 
@@ -17,6 +18,7 @@ $mydb = new mysqli('127.0.0.1','userInfo','theBestPassword','data');
 if ($mydb->errno != 0)
 {
 	echo "failed to connect to database: ". $mydb->error . PHP_EOL;
+	sendLog("ERROR", "failed to connect to database: " . $mydb->error, "testLoginWithDB.php", "database");
 	exit(0);
 }
 
@@ -32,14 +34,17 @@ function doLogin($email,$password)
     $stmt = $mydb->prepare($query);
     if ($stmt === false) {
         echo "Failed to prepare statement: " . $mydb->error . PHP_EOL;
-        return array("returnCode" => "2", "message" => "Failed to prepare statement");
+        sendLog("ERROR", "Failed to prepare statement: " . $mydb->error, "testLoginWithDB.php", "database");
+	return array("returnCode" => "2", "message" => "Failed to prepare statement");
     }
 
     $stmt->bind_param('s', $email);
 
     if (!$stmt->execute())
 {
+	
 	echo "failed to execute query:".PHP_EOL;
+	sendLog("ERROR", "failed to execute query: " . $mydb->error, "testLoginWithDB.php", "database");
 	echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
 	return array("returnCode" => "2", "message" => "db error");
     }
@@ -92,6 +97,7 @@ function doRegister($email, $password)
     if (!$stmt->execute())
 {
         echo "failed to execute query:".PHP_EOL;
+	sendLog("ERROR", "failed to execute query: " . $mydb->error, "testLoginWithDB.php", "database");
         echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
         return array("returnCode" => "2", "message" => "db error");
     }
@@ -112,6 +118,7 @@ function doRegister($email, $password)
 	 if (!$stmt->execute())
 {
             echo "failed to execute query:".PHP_EOL;
+	    sendLog("ERROR", "failed to execute query: " . $mydb->error, "testLoginWithDB.php", "database");
             echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
 	    return array("returnCode" => 2, "message" => "db error /session not valid");
 	 }
@@ -149,6 +156,7 @@ function deleteSession($sessionID)
 	if (!$stmt->execute())
 	{
 		echo "failed to execute query:".PHP_EOL;
+		sendLog("ERROR", "failed to execute query: " . $mydb->error, "testLoginWithDB.php", "database");
 		echo __FILE__.':'.__LINE__.":error: ".$mydb->error.php_EOL;
 		return array ("returnCode" => 0, "message" => "db error");
 	}
@@ -166,6 +174,7 @@ function newReview($user_id, $game, $rating, $reviewText, $genre, $release, $is_
 	if (!$stmt->execute())
         {
                 echo "failed to execute query:".PHP_EOL;
+		sendLog("ERROR", "failed to execute query: " . $mydb->error, "testLoginWithDB.php", "database");
                 echo __FILE__.':'.__LINE__.":error: ".$mydb->error.php_EOL;
                 return array ("returnCode" => 0, "message" => "db error");
         }
@@ -180,6 +189,7 @@ function newReview($user_id, $game, $rating, $reviewText, $genre, $release, $is_
 	if (!$stmt->execute())
         {
                 echo "failed to execute query:".PHP_EOL;
+		sendLog("ERROR", "failed to execute query: " . $mydb->error, "testLoginWithDB.php", "database");
                 echo __FILE__.':'.__LINE__.":error: ".$mydb->error.php_EOL;
                 return array ("returnCode" => 0, "message" => "db error");
         }
@@ -196,6 +206,7 @@ function newReview($user_id, $game, $rating, $reviewText, $genre, $release, $is_
         if (!$stmt->execute())
         {
                 echo "failed to execute query:".PHP_EOL;
+		sendLog("ERROR", "failed to execute query: " . $mydb->error, "testLoginWithDB.php", "database");
                 echo __FILE__.':'.__LINE__.":error: ".$mydb->error.php_EOL;
                 return array ("returnCode" => 0, "message" => "db error");
         }
@@ -219,6 +230,7 @@ function handlePrivate($user_id, $game)
         if (!$stmt->execute())
         {
                 echo "failed to execute query:".PHP_EOL;
+		sendLog("ERROR", "failed to execute query: " . $mydb->error, "testLoginWithDB.php", "database");
                 echo __FILE__.':'.__LINE__.":error: ".$mydb->error.php_EOL;
                 return array ("returnCode" => 0, "message" => "db error");
         }
@@ -234,7 +246,8 @@ function handlePrivate($user_id, $game)
 
         if (!$stmt->execute()) {
             echo "Failed to execute query: " . PHP_EOL;
-            echo __FILE__ . ':' . __LINE__ . ": error: " . $mydb->error . PHP_EOL;
+	sendLog("ERROR", "Failed to execute query: " . $mydb->error, "testLoginWithDB.php", "database");
+	echo __FILE__ . ':' . __LINE__ . ": error: " . $mydb->error . PHP_EOL;
             return array("returnCode" => 0, "message" => "Database error");
     }
 
@@ -254,7 +267,8 @@ function handlePrivate($user_id, $game)
 
         if (!$stmt->execute()) {
             echo "Failed to execute query: " . PHP_EOL;
-            echo __FILE__ . ':' . __LINE__ . ": error: " . $mydb->error . PHP_EOL;
+        sendLog("ERROR", "failed to execute query: " . $mydb->error, "testLoginWithDB.php", "database");    
+	echo __FILE__ . ':' . __LINE__ . ": error: " . $mydb->error . PHP_EOL;
             return array("returnCode" => 0, "message" => "Database error during update");
         }
 
@@ -276,7 +290,8 @@ function getReviews($user_id){
          if (!$stmt->execute())
 {
             echo "failed to execute query:".PHP_EOL;
-            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+        sendLog("ERROR", "failed to execute query: " . $mydb->error, "testLoginWithDB.php", "database");    
+	echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
             return array("returnCode" => 2, "message" => "db error /session not valid");
          }
 	 $response = $stmt->get_result();
@@ -320,6 +335,7 @@ function getFollowedReviews($user_id){
          if (!$stmt->execute())
 {
             echo "failed to execute query:".PHP_EOL;
+	    sendLog("ERROR", "Failed to execute query: " . $mydb->error, "testLoginWithDB.php", "database");
             echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
             return array("returnCode" => 2, "message" => "db error /session not valid");
          }
@@ -346,7 +362,8 @@ function handleFollow($user_id, $follow_id){
          if (!$stmt->execute())
 {
             echo "failed to execute query:".PHP_EOL;
-            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+        sendLog("ERROR", "failed to execute query: " . $mydb->error, "testLoginWithDB.php", "database");   
+	 echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
             return array("returnCode" => 2, "message" => "db error /session not valid");
          }
          $response = $stmt->get_result();
@@ -364,6 +381,7 @@ function handleFollow($user_id, $follow_id){
 		if (!$stmt->execute())
 {
             echo "failed to execute query:".PHP_EOL;
+		sendLog("ERROR", "failed to execute query: " . $mydb->error, "testLoginWithDB.php", "database");
             echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
             return array("returnCode" => 2, "message" => "db error /session not valid");
          }
@@ -381,7 +399,8 @@ function handleFollow($user_id, $follow_id){
                 if (!$stmt->execute())
 {
             echo "failed to execute query:".PHP_EOL;
-            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+         sendLog("ERROR", "failed to execute query: " . $mydb->error, "testLoginWithDB.php", "database");   
+	 echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
             return array("returnCode" => 2, "message" => "db error /session not valid");
          }
 		$stmt->close();
@@ -390,7 +409,7 @@ function handleFollow($user_id, $follow_id){
 	 
 	 
 	 }
-
+ 
 }
 
 function getAll($search)
@@ -424,7 +443,8 @@ function getAll($search)
          if (!$stmt->execute())
 {
             echo "failed to execute query:".PHP_EOL;
-            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+	   sendLog("ERROR", "failed to execute query: " . $mydb->error, "testLoginWithDB.php", "database"); 
+           echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
             return array("returnCode" => 2, "message" => "db error");
          }
          $response = $stmt->get_result();
@@ -446,7 +466,8 @@ function getProfileInfo($user_id){
          if (!$stmt->execute())
 {
             echo "failed to execute query:".PHP_EOL;
-            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+        sendLog("ERROR", "failed to execute query: " . $mydb->error, "testLoginWithDB.php", "database");    
+	echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
             return array("returnCode" => 2, "message" => "db error /session not valid");
          }
 	 $response = $stmt->get_result();
@@ -474,7 +495,8 @@ function getFollowStatus($user_id, $follow_id){
          if (!$stmt->execute())
 {
             echo "failed to execute query:".PHP_EOL;
-            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+        sendLog("ERROR", "failed to execute query: " . $mydb->error, "testLoginWithDB.php", "database");    
+	echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
             return array("returnCode" => 2, "message" => "db error");
          }
          $response = $stmt->get_result();
@@ -503,6 +525,7 @@ function getRecommendations($user_id)
          if (!$stmt->execute())
 {
             echo "failed to execute query:".PHP_EOL;
+	sendLog("ERROR", "failed to execute query: " . $mydb->error, "testLoginWithDB.php", "database");
             echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
             return array("returnCode" => 2, "message" => "db error");
 	 }
@@ -526,6 +549,7 @@ function getRecommendations($user_id)
 
         if (!$stmt->execute()){
             echo "failed to execute query:".PHP_EOL;
+	    sendLog("ERROR", "failed to execute query: " . $mydb->error, "testLoginWithDB.php", "database");
             echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
             return array("returnCode" => 2, "message" => "db error /session not valid");
         }
@@ -559,7 +583,8 @@ function getProfileALL($user_id, $follow_id, $viewer_id)
          if (!$stmt->execute())
 {
             echo "failed to execute query:".PHP_EOL;
-            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+            sendLog("ERROR", "failed to execute query: " . $mydb->error, "testLoginWithDB.php", "database");
+	    echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
             return array("returnCode" => 2, "message" => "db error /session not valid");
          }
          $response = $stmt->get_result();
@@ -575,6 +600,7 @@ function getProfileALL($user_id, $follow_id, $viewer_id)
          if (!$stmt->execute())
 {
             echo "failed to execute query:".PHP_EOL;
+		sendLog("ERROR", "failed to execute query: " . $mydb->error, "testLoginWithDB.php", "database");
             echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
             return array("returnCode" => 2, "message" => "db error");
 	 }
@@ -594,6 +620,7 @@ function getProfileALL($user_id, $follow_id, $viewer_id)
          if (!$stmt->execute())
 {
             echo "failed to execute query:".PHP_EOL;
+		sendLog("ERROR", "failed to execute query: " . $mydb->error, "testLoginWithDB.php", "database");
             echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
             return array("returnCode" => 2, "message" => "db error");
          }

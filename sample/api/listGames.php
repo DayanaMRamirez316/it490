@@ -34,6 +34,7 @@ if (isset($_SESSION['message']))
 require_once('../app/path.inc');
 require_once('../app/get_host_info.inc');
 require_once('../app/rabbitMQLib.inc');
+require_once('../../logging/sendLog.php');
 
 $searchInput ="";
 $games = array();
@@ -100,6 +101,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"]) && $_POST["se
 		}
 		
 	}else{
+		sendLog("ERROR", "listGames request failed", "listGames.php", "webserver");
 		echo "something went wrong";
 	}
 }

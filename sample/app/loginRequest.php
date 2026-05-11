@@ -7,9 +7,11 @@ require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 require_once('phpValidation.php');
+require_once('../../logging/sendLog.php');
 
 $error = validateLogin();
 if ($error != "") {
+	sendLog("WARNING", "Login validation failed: " . $error, "loginRequest.php", "Webserver");
 	$_SESSION["error"] = $error;
 	header("Location: /loginPage.php");
 	exit();
@@ -44,6 +46,7 @@ if (isset($response['returnCode']) && (int)$response['returnCode'] === 1){
 	exit();
 }
 else {
+	sendLog("WARNING", "Login failed for email: " . $_POST['email'], "loginRequest.php", "Webserver");
 	$_SESSION['error'] = "Invalid email or password.";
 	header("Location: /loginPage.php");
 	exit();
