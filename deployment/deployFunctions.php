@@ -62,7 +62,7 @@ function sendPackage(rabbitMQClient $client, mysqli $mydb) {
   $stmt->bind_param('ss', $filename, $newVer);
   $stmt->execute();
   //wait for the package to be created before allowing deploy
-  sleep(2);
+  sleep(5);
 
   //combin parts of the package to be in one wrapped deployment archive
   exec("/bin/bash /opt/it490/deployment/deploy_wrap.sh wrap $newVer", $output, $code);

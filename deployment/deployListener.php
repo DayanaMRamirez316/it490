@@ -3,6 +3,10 @@
 require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
+// Handles all the the deployment listener requests.
+// Deployment is handled in this file. Built based on the deployFunctions.php file, this file
+// executes deployment based on version control and bash scripts.
+// Exectutes the bash scripts based in the deployment folder.
 
 function bashReport($output) {
     foreach ($output as $line) {
@@ -25,6 +29,9 @@ function doDeploy($version) {
 	if ($code != 0) $success = false;
 	return $success;
 }
+
+//Function requests information from the Processor, if the message is typed incorrectly,
+// then it will reject and send an error message regarding the typos the user put.
 
 function requestProcessor($request) {
   echo "received request".PHP_EOL;
@@ -65,6 +72,8 @@ function requestProcessor($request) {
   }
 }
 $server = new rabbitMQServer("deploy.ini","testServer");
+
+//Sets up a new rabbitMQServeer
 
 echo "testRabbitMQServer BEGIN".PHP_EOL;
 $server->process_requests('requestProcessor');
