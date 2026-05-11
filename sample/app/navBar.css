@@ -1,0 +1,52 @@
+.navbar {
+    background-color: #333;
+    padding: 10px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+
+.nav-list, .nav-menu {
+
+    list-style: none;
+    display: flex;
+    gap: 15px;
+    margin: 0;
+    padding: 0;
+}
+
+
+.nav-list a, .nav-menu a {
+    color: white;
+    text-decoration: none;
+}
+
+
+.nav-menu button {
+    color: white;
+    background: none;
+    border: 1px solid white;
+    padding: 5px;
+    cursor: pointer;
+
+}
+
+
+
+
+/* Responsive design - Visw */
+
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+    }
+
+    .nav-list, .nav-menu {
+        flex-direction: column;
+        gap: 8px;
+        padding: 5px 0;
+    }
+}
+
+
+
