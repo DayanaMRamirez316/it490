@@ -1,11 +1,53 @@
-.loginForm{
-background: lightblue;
-padding: 40px;
-border-radius: 20px; 
-width: 320px;
-margin: auto; 
+
+
+.loginForm {
+    background: lightblue;
+    padding: 40px;
+    border-radius: 20px;
+    width: 320px;
+    margin: auto;
 }
 
-.signUp{
-    text-align: center; 
+.signUp {
+    text-align: center;
 }
+
+input {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+}
+
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+/* Responsive design - Viswa*/
+
+@media (max-width: 768px) {
+    .loginForm {
+        width: 90%;
+        padding: 30px;
+        box-sizing: border-box;
+    }
+
+    input {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+    }
+
+    button[type=submit] {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+        margin-top: 10px;
+    }
+}}
