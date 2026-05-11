@@ -29,7 +29,7 @@ function Install($bundleName, $version, $bundlePath){
 
 	ftp_pasv($conn, true);
 
-	if(!ftp_get($conn, "/tmp/update.tar", $bundlePath, FTP_BINARY)){
+	if(!ftp_get($conn, "/tmp/package.tar", $bundlePath, FTP_BINARY)){
 		return array("returnCode" => 0, "message" => "download failed");
 	}
 
@@ -38,10 +38,10 @@ function Install($bundleName, $version, $bundlePath){
 	//extract
 	$extract = "/tmp/install_" . time();
 	mkdir($extract);
-	exec("tar -xf /tmp/update.tar -C " . $extract);
+	exec("tar -xf /tmp/package.tar -C " . $extract);
 	exec("cp -r " . $extract . " /* /var/www/sample/");
 	exec("sudo systemctl restart apache2");
-	exec("rm -rf /tmp/update.tar" . $extract);
+	exec("rm -rf /tmp/package.tar" . $extract);
 
 	return array("returnCode" => 1, "message" => "Install successful!");
 }
